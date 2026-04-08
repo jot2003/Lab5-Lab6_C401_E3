@@ -52,7 +52,7 @@ SÁNG — Lecture + Workshop                   CHIỀU — Lecture + Hackathon k
 
 Chọn 1 sản phẩm AI thật (MoMo / Vietnam Airlines / V-App), dùng thử, phân tích theo 4 paths, sketch cải thiện.
 
-**Xem chi tiết:** [`01-ux-exercise.md`](01-ux-exercise.md)
+**Xem chi tiết:** [`02-ux-exercise.md`](02-ux-exercise.md)
 
 **Output:** mỗi người nộp sketch giấy + ghi chú phân tích 4 paths. Đây là điểm cá nhân.
 
@@ -60,7 +60,7 @@ Chọn 1 sản phẩm AI thật (MoMo / Vietnam Airlines / V-App), dùng thử, 
 
 Sketch Canvas cho project của nhóm lên giấy A3 hoặc whiteboard. Peer peek: đi xem Canvas nhóm khác, ghi 1 feedback.
 
-**Xem template:** [`02-canvas-template.md`](02-canvas-template.md)
+**Xem template:** [`03-canvas-template.md`](03-canvas-template.md)
 
 ### 3. SPEC draft (từ 16:00 + tối, nhóm)
 
@@ -122,9 +122,9 @@ Nhóm 3–5 người, chia zone (~5 team/zone).
 
 | File | Mô tả |
 |------|-------|
-| [`01-ux-exercise.md`](01-ux-exercise.md) | Đề bài UX workshop — hướng dẫn từng phần, tiêu chí nộp bài |
-| [`02-canvas-template.md`](02-canvas-template.md) | Template AI Product Canvas — dùng cho Canvas practice |
-| [`03-day5-cheatsheet.md`](03-day5-cheatsheet.md) | Tóm tắt 1 trang các framework từ lecture — tra cứu nhanh |
+| [`02-ux-exercise.md`](02-ux-exercise.md) | Đề bài UX workshop — hướng dẫn từng phần, tiêu chí nộp bài |
+| [`03-canvas-template.md`](03-canvas-template.md) | Template AI Product Canvas — dùng cho Canvas practice |
+| [`04-day5-cheatsheet.md`](04-day5-cheatsheet.md) | Tóm tắt 1 trang các framework từ lecture — tra cứu nhanh |
 
 ---
 

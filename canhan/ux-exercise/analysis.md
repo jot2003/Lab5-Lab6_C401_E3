@@ -1,7 +1,7 @@
 # Bài tập UX — Vietnam Airlines Chatbot NEO
 
 **Học viên:** [Điền họ tên] — **Mã học viên:** [Điền mã]  
-**Sản phẩm (theo đề `01-ux-exercise.md`):** Vietnam Airlines — Chatbot NEO  
+**Sản phẩm (theo đề `02-ux-exercise.md`):** Vietnam Airlines — Chatbot NEO  
 **Truy cập:** vietnamairlines.com hoặc Zalo VNA  
 **Kênh cụ thể mình test:** [Web / Zalo / …]  
 **Ngày test:** [DD/MM/2026]
@@ -53,7 +53,7 @@
 
 ## 3. Phân tích 4 paths
 
-**Framework 4 paths (theo `01-ux-exercise.md`):**
+**Framework 4 paths (theo `02-ux-exercise.md`):**
 
 | Path | Câu hỏi (đề gốc) |
 |------|------------------|
@@ -71,7 +71,7 @@
 | **3. Sai / failure** | Sai fact, hoặc “trả lời như đã chốt” dù thiếu điều kiện; khó recover | User hỏi theo **VN205**; bot đáp bằng **khung nội địa theo hạng** mà chưa chốt route/điều kiện vé của case đó | Theo góc **product failure** (không cần chứng minh sai từng kg): risk là user **áp nhận nhầm** nếu thực tế có ngoại lệ theo fare/rule. **Recover** hạn chế vì không bắt được tín hiệu “mã chuyến” từ vn205. |
 | **4. Mất tin** | User nghi ngờ; cần verify / human / exit rõ | User nói thẳng **“Không đúng với thông tin trên website”** | Trong đoạn chat **chưa thấy** bước **verify nhanh** (link điều khoản hành lý, checklist 3 thông tin bắt buộc) hay **nút “Gặp tư vấn viên”** nổi bật ngay sau câu mất tin — user vẫn ở vòng “xin thêm thông tin” chung. |
 
-**Tự phân tích (theo `01-ux-exercise.md`):**
+**Tự phân tích (theo `02-ux-exercise.md`):**
 
 - **Path mạnh nhất:** **Path 1** khi câu hỏi khớp **FAQ chuẩn** (bảng hành lý theo hạng; sau khi nói **Phổ thông** thì chốt **23kg**) — nội dung **có cấu trúc**, có **gợi ý bước tiếp** (mã đặt chỗ / số vé).
 - **Path yếu nhất:** **Path 2** (kết hợp rủi ro **Path 3**) — có **xin thêm thông tin** nhưng **không hiểu vn205**, **lặp template**; lời đáp đầu dễ **lệch ngữ cảnh** với câu hỏi **theo chuyến**.
