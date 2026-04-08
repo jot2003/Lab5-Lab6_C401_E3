@@ -5,10 +5,13 @@ import { useMemo, useState } from "react";
 import {
   ClarificationCard,
   type ConfidenceLevel,
+  MetricsPanel,
   PlanCard,
   PromptInput,
+  RedFlagPanel,
   ReasoningPanel,
   Toast,
+  TrustControlPanel,
 } from "@/components/vinagent-ui";
 import { evaluatePlannerDecision } from "@/lib/planner";
 
@@ -38,6 +41,9 @@ export default function Home() {
   const [selectedPlan, setSelectedPlan] = useState<"A" | "B" | null>(null);
   const [usePlanB, setUsePlanB] = useState(false);
   const [isEdited, setIsEdited] = useState(false);
+  const [lastConfidenceScore, setLastConfidenceScore] = useState(100);
+  const [autoActionEnabled, setAutoActionEnabled] = useState(false);
+  const [redFlags, setRedFlags] = useState<string[]>([]);
   const [reasonList, setReasonList] = useState<string[]>([
     "Ban yeu cau tranh lich sang va giu CECS101 trong hoc ky nay.",
     "SIS snapshot cho thay lop CECS101 sang chi con 2 cho.",
@@ -75,6 +81,18 @@ export default function Home() {
 
   function handleGenerate() {
     const decision = evaluatePlannerDecision(prompt);
+    setLastConfidenceScore(decision.confidenceScore);
+    const nextFlags: string[] = [];
+    if (!decision.toolSnapshot.dataFresh) {
+      nextFlags.push("Stale SIS data (>5m), can refresh truoc khi submit.");
+    }
+    if (decision.confidenceScore < 70) {
+      nextFlags.push("Confidence duoi 70, khong du dieu kien auto-action.");
+    }
+    if (decision.toolSnapshot.seatRisk === "high") {
+      nextFlags.push("Seat risk cao, uu tien Plan B de tranh fail.");
+    }
+    setRedFlags(nextFlags);
     setReasonList([
       ...decision.reasons,
       `Tool snapshot: ${decision.toolSnapshot.sourceTimestamp}, data ${
@@ -149,15 +167,55 @@ export default function Home() {
     });
   }
 
+  const metrics = useMemo(
+    () => [
+      {
+        label: "Schedule Precision Rate",
+        value: `${Math.max(60, Math.round(lastConfidenceScore * 0.95))}%`,
+        target: "> 85%",
+        status:
+          lastConfidenceScore >= 90
+            ? ("good" as const)
+            : lastConfidenceScore >= 75
+              ? ("warning" as const)
+              : ("danger" as const),
+      },
+      {
+        label: "Manual Edit Rate",
+        value: isEdited ? "31%" : "18%",
+        target: "< 25%",
+        status: isEdited ? ("warning" as const) : ("good" as const),
+      },
+      {
+        label: "Plan B Activation",
+        value: usePlanB ? "22%" : "9%",
+        target: "< 15%",
+        status: usePlanB ? ("warning" as const) : ("good" as const),
+      },
+      {
+        label: "Red Flags Open",
+        value: `${redFlags.length}`,
+        target: "0",
+        status:
+          redFlags.length === 0
+            ? ("good" as const)
+            : redFlags.length < 3
+              ? ("warning" as const)
+              : ("danger" as const),
+      },
+    ],
+    [isEdited, lastConfidenceScore, redFlags.length, usePlanB],
+  );
+
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-8">
       <header className="space-y-2">
         <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
-          VinAgent Frontend MVP — Phase 2
+          VinAgent Frontend MVP — Phase 4
         </h1>
         <p className="text-sm text-muted">
-          Interactive mock flows for happy path, low-confidence clarification,
-          failure fallback, and trust recovery.
+          Interactive flows with confidence-aware planner, metrics dashboard, red
+          flags, and trust control guardrails.
         </p>
       </header>
 
@@ -166,6 +224,30 @@ export default function Home() {
         onChange={setPrompt}
         onSubmit={handleGenerate}
       />
+      <section className="grid gap-4 lg:grid-cols-2">
+        <MetricsPanel metrics={metrics} />
+        <TrustControlPanel
+          autoActionEnabled={autoActionEnabled}
+          onToggleAutoAction={() => {
+            const nextValue = !autoActionEnabled;
+            if (nextValue && (lastConfidenceScore < 80 || redFlags.length > 0)) {
+              setToast({
+                title: "Auto-action blocked",
+                message:
+                  "Khong the bat auto-action khi confidence thap hoac con red flags.",
+              });
+              return;
+            }
+            setAutoActionEnabled(nextValue);
+            setToast({
+              title: "Trust control updated",
+              message: nextValue
+                ? "Auto-action da bat voi dieu kien an toan."
+                : "Auto-action da tat, can xac nhan thu cong.",
+            });
+          }}
+        />
+      </section>
 
       <main className="grid gap-6 lg:grid-cols-2">
         <section className="space-y-4">
@@ -200,6 +282,16 @@ export default function Home() {
           <ReasoningPanel
             reasons={reasonList}
           />
+          <RedFlagPanel
+            flags={redFlags}
+            onAcknowledge={() => {
+              setRedFlags([]);
+              setToast({
+                title: "Flags acknowledged",
+                message: "Da danh dau red flags va reset trang thai canh bao.",
+              });
+            }}
+          />
           {(flow === "lowConfidence" || flow === "idle") && (
             <ClarificationCard
               onChoose={(choice) => {
@@ -219,8 +311,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t pt-4 text-xs text-muted">
-        Phase 2 focus: full interactive mock flows, editable planning, fallback
-        behavior, and friendly trust UX.
+        Phase 4 focus: metrics dashboard, red flags, and trust control guardrails.
       </footer>
     </div>
   );

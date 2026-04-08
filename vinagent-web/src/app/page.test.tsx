@@ -5,13 +5,16 @@ import { describe, expect, it } from "vitest";
 import Home from "./page";
 
 describe("Home page", () => {
-  it("renders Phase 2 heading and sections", () => {
+  it("renders Phase 4 heading and sections", () => {
     render(<Home />);
     expect(
-      screen.getByRole("heading", { name: /VinAgent Frontend MVP/i }),
+      screen.getByRole("heading", { name: /VinAgent Frontend MVP — Phase 4/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Scenario Planning/i)).toBeInTheDocument();
     expect(screen.getByText(/Trust & Recovery/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Metrics dashboard/i }),
+    ).toBeInTheDocument();
   });
 
   it("runs low-confidence path and asks for clarification", () => {
@@ -39,6 +42,26 @@ describe("Home page", () => {
     expect(
       screen.getAllByText(/Break block - 30m recovery/i).length,
     ).toBeGreaterThanOrEqual(1);
+  });
+
+  it("blocks auto-action when guardrails are not met", () => {
+    render(<Home />);
+    fireEvent.change(screen.getByRole("textbox", { name: /Ask VinAgent/i }), {
+      target: { value: "high risk stale" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Generate plans/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Auto-action: OFF/i }));
+    expect(screen.getByText(/Auto-action blocked/i)).toBeInTheDocument();
+  });
+
+  it("allows acknowledging red flags", () => {
+    render(<Home />);
+    fireEvent.change(screen.getByRole("textbox", { name: /Ask VinAgent/i }), {
+      target: { value: "high risk stale" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Generate plans/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Acknowledge flags/i }));
+    expect(screen.getByText(/Flags acknowledged/i)).toBeInTheDocument();
   });
 
   it("passes accessibility smoke test", async () => {

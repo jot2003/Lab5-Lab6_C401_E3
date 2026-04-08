@@ -233,3 +233,106 @@ export function Toast({
     </aside>
   );
 }
+
+export type MetricCardItem = {
+  label: string;
+  value: string;
+  status: "good" | "warning" | "danger";
+  target: string;
+};
+
+export function MetricsPanel({ metrics }: { metrics: MetricCardItem[] }) {
+  return (
+    <section className="card-surface rounded-2xl border p-4">
+      <h3 className="mb-3 text-sm font-semibold">Metrics dashboard</h3>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {metrics.map((metric) => (
+          <article key={metric.label} className="rounded-xl border bg-background p-3">
+            <p className="text-xs text-muted">{metric.label}</p>
+            <p className="mt-1 text-lg font-semibold">{metric.value}</p>
+            <p className="mt-1 text-xs text-muted">Target: {metric.target}</p>
+            <p
+              className={cn(
+                "mt-2 inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold",
+                metric.status === "good" &&
+                  "border-success/40 bg-success/10 text-success",
+                metric.status === "warning" &&
+                  "border-trust-mid/40 bg-trust-mid/10 text-trust-mid",
+                metric.status === "danger" &&
+                  "border-danger/40 bg-danger/10 text-danger",
+              )}
+            >
+              {metric.status === "good"
+                ? "On track"
+                : metric.status === "warning"
+                  ? "Watch"
+                  : "Red flag"}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function RedFlagPanel({
+  flags,
+  onAcknowledge,
+}: {
+  flags: string[];
+  onAcknowledge: () => void;
+}) {
+  return (
+    <section className="card-surface rounded-2xl border border-danger/30 p-4">
+      <h3 className="mb-2 text-sm font-semibold text-danger">Red flags</h3>
+      {flags.length === 0 ? (
+        <p className="text-sm text-muted">Khong co red flag dang mo.</p>
+      ) : (
+        <>
+          <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
+            {flags.map((flag) => (
+              <li key={flag}>{flag}</li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            onClick={onAcknowledge}
+            className="focus-ring mt-3 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-xs font-semibold text-danger"
+          >
+            Acknowledge flags
+          </button>
+        </>
+      )}
+    </section>
+  );
+}
+
+export function TrustControlPanel({
+  autoActionEnabled,
+  onToggleAutoAction,
+}: {
+  autoActionEnabled: boolean;
+  onToggleAutoAction: () => void;
+}) {
+  return (
+    <section className="card-surface rounded-2xl border p-4">
+      <h3 className="mb-2 text-sm font-semibold">Trust controls</h3>
+      <p className="mb-3 text-sm text-muted">
+        Auto-action chi duoc phep khi confidence {"\u003e="} 80 va khong co red
+        flag.
+      </p>
+      <button
+        type="button"
+        onClick={onToggleAutoAction}
+        className={cn(
+          "focus-ring rounded-lg px-3 py-2 text-xs font-semibold",
+          autoActionEnabled
+            ? "bg-success/15 text-success"
+            : "bg-background text-foreground border border-border",
+        )}
+      >
+        {autoActionEnabled ? "Auto-action: ON" : "Auto-action: OFF"}
+      </button>
+    </section>
+  );
+}

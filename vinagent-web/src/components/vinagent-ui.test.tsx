@@ -5,10 +5,13 @@ import { describe, expect, it, vi } from "vitest";
 import {
   ClarificationCard,
   ConfidenceBadge,
+  MetricsPanel,
   PlanCard,
   PromptInput,
+  RedFlagPanel,
   ReasoningPanel,
   Toast,
+  TrustControlPanel,
 } from "./vinagent-ui";
 
 describe("VinAgent UI components", () => {
@@ -56,6 +59,35 @@ describe("VinAgent UI components", () => {
     expect(onChoose).toHaveBeenCalled();
   });
 
+  it("renders metrics and trust controls", () => {
+    const onAcknowledge = vi.fn();
+    const onToggleAutoAction = vi.fn();
+    render(
+      <>
+        <MetricsPanel
+          metrics={[
+            {
+              label: "Schedule Precision Rate",
+              value: "88%",
+              status: "good",
+              target: "> 85%",
+            },
+          ]}
+        />
+        <RedFlagPanel flags={["Stale data"]} onAcknowledge={onAcknowledge} />
+        <TrustControlPanel
+          autoActionEnabled={false}
+          onToggleAutoAction={onToggleAutoAction}
+        />
+      </>,
+    );
+    expect(screen.getByText(/Metrics dashboard/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Acknowledge flags/i }));
+    expect(onAcknowledge).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: /Auto-action: OFF/i }));
+    expect(onToggleAutoAction).toHaveBeenCalledTimes(1);
+  });
+
   it("passes accessibility smoke test", async () => {
     const { container } = render(
       <>
@@ -64,6 +96,16 @@ describe("VinAgent UI components", () => {
           title="Plan A"
           confidence="high"
           courses={["CECS101", "CECS204"]}
+        />
+        <MetricsPanel
+          metrics={[
+            {
+              label: "Schedule Precision Rate",
+              value: "88%",
+              status: "good",
+              target: "> 85%",
+            },
+          ]}
         />
       </>,
     );
