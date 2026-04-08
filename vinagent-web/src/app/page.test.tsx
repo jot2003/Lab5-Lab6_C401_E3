@@ -1,25 +1,43 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "vitest-axe";
 import { describe, expect, it } from "vitest";
 
 import Home from "./page";
 
 describe("Home page", () => {
-  it("renders Phase 1 heading and sections", () => {
+  it("renders Phase 2 heading and sections", () => {
     render(<Home />);
     expect(
-      screen.getByRole("heading", { name: /VinAgent UI Foundation/i }),
+      screen.getByRole("heading", { name: /VinAgent Frontend MVP/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Scenario Planning/i)).toBeInTheDocument();
     expect(screen.getByText(/Trust & Recovery/i)).toBeInTheDocument();
   });
 
-  it("renders plan cards and recovery controls", () => {
+  it("runs low-confidence path and asks for clarification", () => {
     render(<Home />);
-    expect(screen.getByText(/Plan A — Optimized/i)).toBeInTheDocument();
-    expect(screen.getByText(/Plan B — Backup/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: /Ask VinAgent/i }), {
+      target: { value: "help" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Generate plans/i }));
+    expect(screen.getByText(/Low confidence detected/i)).toBeInTheDocument();
+  });
+
+  it("falls back to Plan B in failure scenario", () => {
+    render(<Home />);
+    fireEvent.change(screen.getByRole("textbox", { name: /Ask VinAgent/i }), {
+      target: { value: "high risk" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Generate plans/i }));
+    fireEvent.click(screen.getAllByRole("button", { name: /Xác nhận Plan/i })[0]);
+    expect(screen.getByText(/Plan B was activated/i)).toBeInTheDocument();
+  });
+
+  it("supports editable plan interactions", () => {
+    render(<Home />);
+    fireEvent.click(screen.getAllByRole("button", { name: /Editable Plan/i })[0]);
     expect(
-      screen.getAllByRole("button", { name: /Escalate to Advisor/i }).length,
+      screen.getAllByText(/Break block - 30m recovery/i).length,
     ).toBeGreaterThanOrEqual(1);
   });
 

@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { axe } from "vitest-axe";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   ClarificationCard,
@@ -13,7 +13,7 @@ import {
 
 describe("VinAgent UI components", () => {
   it("renders prompt input and button", () => {
-    render(<PromptInput />);
+    render(<PromptInput value="" onChange={() => undefined} onSubmit={() => undefined} />);
     expect(screen.getByPlaceholderText(/Lên lịch HK Xuân/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Generate plans/i }),
@@ -41,22 +41,25 @@ describe("VinAgent UI components", () => {
   });
 
   it("renders trust recovery cards", () => {
+    const onChoose = vi.fn();
     render(
       <>
         <ReasoningPanel reasons={["Ly do 1", "Ly do 2"]} />
-        <ClarificationCard />
+        <ClarificationCard onChoose={onChoose} />
         <Toast title="Done" message="Message" />
       </>,
     );
     expect(screen.getByText(/Showing work/i)).toBeInTheDocument();
     expect(screen.getByText(/Need clarification/i)).toBeInTheDocument();
     expect(screen.getByText("Done")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Tránh lịch sáng/i }));
+    expect(onChoose).toHaveBeenCalled();
   });
 
   it("passes accessibility smoke test", async () => {
     const { container } = render(
       <>
-        <PromptInput />
+        <PromptInput value="" onChange={() => undefined} onSubmit={() => undefined} />
         <PlanCard
           title="Plan A"
           confidence="high"

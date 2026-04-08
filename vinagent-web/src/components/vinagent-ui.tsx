@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-type ConfidenceLevel = "high" | "medium" | "low";
+export type ConfidenceLevel = "high" | "medium" | "low";
 
 export function ConflictBadge({ hasConflict }: { hasConflict: boolean }) {
   return (
@@ -52,20 +52,36 @@ export function SourceChip({ source }: { source: string }) {
   );
 }
 
-export function PromptInput() {
+export function PromptInput({
+  value,
+  onChange,
+  onSubmit,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
   return (
-    <form className="card-surface flex w-full flex-col gap-3 rounded-2xl border p-4 md:flex-row">
+    <form
+      className="card-surface flex w-full flex-col gap-3 rounded-2xl border p-4 md:flex-row"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit();
+      }}
+    >
       <label htmlFor="prompt" className="sr-only">
         Ask VinAgent
       </label>
       <input
         id="prompt"
         type="text"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
         placeholder="Ví dụ: Lên lịch HK Xuân 2026, tránh sáng, phải có Giải tích 2"
         className="focus-ring w-full rounded-xl border bg-background px-4 py-3 text-sm"
       />
       <button
-        type="button"
+        type="submit"
         className="focus-ring rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
       >
         Generate plans
@@ -79,14 +95,27 @@ export function PlanCard({
   courses,
   confidence,
   hasConflict = false,
+  selected = false,
+  onAccept,
+  onEdit,
+  onEscalate,
 }: {
   title: string;
   courses: string[];
   confidence: ConfidenceLevel;
   hasConflict?: boolean;
+  selected?: boolean;
+  onAccept?: () => void;
+  onEdit?: () => void;
+  onEscalate?: () => void;
 }) {
   return (
-    <article className="card-surface rounded-2xl border p-4">
+    <article
+      className={cn(
+        "card-surface rounded-2xl border p-4",
+        selected && "ring-2 ring-primary/60",
+      )}
+    >
       <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-base font-semibold">{title}</h3>
         <div className="flex items-center gap-2">
@@ -101,7 +130,7 @@ export function PlanCard({
           </li>
         ))}
       </ul>
-      <ActionBar />
+      <ActionBar onAccept={onAccept} onEdit={onEdit} onEscalate={onEscalate} />
     </article>
   );
 }
@@ -123,7 +152,11 @@ export function ReasoningPanel({ reasons }: { reasons: string[] }) {
   );
 }
 
-export function ClarificationCard() {
+export function ClarificationCard({
+  onChoose,
+}: {
+  onChoose: (choice: "avoidMorning" | "keepGroup") => void;
+}) {
   return (
     <section className="card-surface rounded-2xl border p-4">
       <h3 className="mb-2 text-sm font-semibold">Need clarification</h3>
@@ -133,12 +166,14 @@ export function ClarificationCard() {
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
+          onClick={() => onChoose("avoidMorning")}
           className="focus-ring rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium"
         >
           Tránh lịch sáng
         </button>
         <button
           type="button"
+          onClick={() => onChoose("keepGroup")}
           className="focus-ring rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium"
         >
           Giữ lớp cùng nhóm
@@ -148,23 +183,34 @@ export function ClarificationCard() {
   );
 }
 
-export function ActionBar() {
+export function ActionBar({
+  onAccept,
+  onEdit,
+  onEscalate,
+}: {
+  onAccept?: () => void;
+  onEdit?: () => void;
+  onEscalate?: () => void;
+}) {
   return (
     <div className="flex flex-wrap gap-2">
       <button
         type="button"
+        onClick={onAccept}
         className="focus-ring rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground"
       >
         Xác nhận Plan
       </button>
       <button
         type="button"
+        onClick={onEdit}
         className="focus-ring rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold"
       >
         Editable Plan
       </button>
       <button
         type="button"
+        onClick={onEscalate}
         className="focus-ring rounded-lg border border-border bg-background px-3 py-2 text-xs font-semibold"
       >
         Escalate to Advisor
