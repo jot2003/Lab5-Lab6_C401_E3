@@ -1,21 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f9fc;
+  --background: #f8fafc;
   --surface: #ffffff;
+  --surface-glass: rgba(255, 255, 255, 0.72);
   --foreground: #0f172a;
   --muted: #64748b;
-  --border: #dce3ef;
-  --ring: #2563eb;
-  --primary: #1d4ed8;
+  --border: #e2e8f0;
+  --ring: #3b82f6;
+  --primary: #2563eb;
   --primary-foreground: #eff6ff;
-  --success: #15803d;
-  --warning: #b45309;
-  --danger: #b91c1c;
-  --trust-high: #15803d;
-  --trust-mid: #b45309;
-  --trust-low: #b91c1c;
-  --shadow-card: 0 12px 30px rgba(15, 23, 42, 0.08);
+  --accent: #7c3aed;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --trust-high: #16a34a;
+  --trust-mid: #d97706;
+  --trust-low: #dc2626;
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --shadow-elevated: 0 4px 12px rgba(15, 23, 42, 0.08), 0 20px 48px rgba(15, 23, 42, 0.08);
+  --gradient-hero: linear-gradient(135deg, #eff6ff 0%, #f5f3ff 50%, #ecfdf5 100%);
+  --gradient-primary: linear-gradient(135deg, #2563eb, #7c3aed);
 }
 
 @theme inline {
@@ -26,6 +31,7 @@
   --color-border: var(--border);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
@@ -38,22 +44,31 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #090d16;
-    --surface: #111827;
+    --background: #0b0f1a;
+    --surface: #131a2b;
+    --surface-glass: rgba(19, 26, 43, 0.78);
     --foreground: #f1f5f9;
     --muted: #94a3b8;
-    --border: #1f2937;
+    --border: #1e293b;
     --ring: #60a5fa;
     --primary: #3b82f6;
     --primary-foreground: #dbeafe;
+    --accent: #a78bfa;
     --success: #22c55e;
     --warning: #f59e0b;
     --danger: #f87171;
     --trust-high: #22c55e;
     --trust-mid: #f59e0b;
     --trust-low: #f87171;
-    --shadow-card: 0 12px 30px rgba(0, 0, 0, 0.45);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3);
+    --shadow-elevated: 0 4px 12px rgba(0, 0, 0, 0.3), 0 20px 48px rgba(0, 0, 0, 0.4);
+    --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #052e16 100%);
+    --gradient-primary: linear-gradient(135deg, #3b82f6, #a78bfa);
   }
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -76,6 +91,41 @@ body {
   box-shadow: var(--shadow-card);
 }
 
+.card-glass {
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  box-shadow: var(--shadow-card);
+}
+
+.card-elevated {
+  background: var(--surface);
+  box-shadow: var(--shadow-elevated);
+}
+
 .text-muted {
   color: var(--muted);
+}
+
+.gradient-hero {
+  background: var(--gradient-hero);
+}
+
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
 }

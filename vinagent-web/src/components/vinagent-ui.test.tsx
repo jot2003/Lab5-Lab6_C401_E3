@@ -21,15 +21,15 @@ describe("VinAgent UI components", () => {
     render(<PromptInput value="" onChange={() => undefined} onSubmit={() => undefined} />);
     expect(screen.getByPlaceholderText(/Lên lịch HK Xuân/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Generate plans/i }),
+      screen.getByRole("button", { name: /Tạo kế hoạch/i }),
     ).toBeInTheDocument();
   });
 
   it("renders high and low confidence labels", () => {
     const { rerender } = render(<ConfidenceBadge level="high" />);
-    expect(screen.getByText(/High confidence/i)).toBeInTheDocument();
+    expect(screen.getByText(/Độ tin cậy cao/i)).toBeInTheDocument();
     rerender(<ConfidenceBadge level="low" />);
-    expect(screen.getByText(/Low confidence/i)).toBeInTheDocument();
+    expect(screen.getByText(/Độ tin cậy thấp/i)).toBeInTheDocument();
   });
 
   it("renders plan card content and actions", () => {
@@ -51,12 +51,12 @@ describe("VinAgent UI components", () => {
       <>
         <ReasoningPanel reasons={["Ly do 1", "Ly do 2"]} />
         <ClarificationCard onChoose={onChoose} />
-        <Toast title="Done" message="Message" />
+        <Toast title="Hoàn tất" message="Thông báo" />
       </>,
     );
-    expect(screen.getByText(/Showing work/i)).toBeInTheDocument();
-    expect(screen.getByText(/Need clarification/i)).toBeInTheDocument();
-    expect(screen.getByText("Done")).toBeInTheDocument();
+    expect(screen.getByText(/Cách hệ thống suy luận/i)).toBeInTheDocument();
+    expect(screen.getByText(/Cần làm rõ thêm/i)).toBeInTheDocument();
+    expect(screen.getByText("Hoàn tất")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Tránh lịch sáng/i }));
     expect(onChoose).toHaveBeenCalled();
   });
@@ -69,24 +69,24 @@ describe("VinAgent UI components", () => {
         <MetricsPanel
           metrics={[
             {
-              label: "Schedule Precision Rate",
+              label: "Độ chính xác xếp lịch",
               value: "88%",
               status: "good",
               target: "> 85%",
             },
           ]}
         />
-        <RedFlagPanel flags={["Stale data"]} onAcknowledge={onAcknowledge} />
+        <RedFlagPanel flags={["Dữ liệu cũ"]} onAcknowledge={onAcknowledge} />
         <TrustControlPanel
           autoActionEnabled={false}
           onToggleAutoAction={onToggleAutoAction}
         />
       </>,
     );
-    expect(screen.getByText(/Metrics dashboard/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Acknowledge flags/i }));
+    expect(screen.getByText(/Bảng chỉ số vận hành/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Đánh dấu đã xử lý/i }));
     expect(onAcknowledge).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole("button", { name: /Auto-action: OFF/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Tự động hành động: TẮT/i }));
     expect(onToggleAutoAction).toHaveBeenCalledTimes(1);
   });
 
@@ -98,16 +98,16 @@ describe("VinAgent UI components", () => {
         <ScenarioPresetBar
           presets={[
             { id: "h", label: "Happy path", prompt: "happy prompt" },
-            { id: "l", label: "Low confidence", prompt: "help" },
+            { id: "l", label: "Độ tin cậy thấp", prompt: "help" },
           ]}
           onPick={onPick}
         />
         <SessionSummaryCard summary="flow=happy" onCopy={onCopy} />
       </>,
     );
-    fireEvent.click(screen.getByRole("button", { name: /Happy path/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Happy path|Luồng thuận lợi/i }));
     expect(onPick).toHaveBeenCalledWith("happy prompt");
-    fireEvent.click(screen.getByRole("button", { name: /Copy summary/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Sao chép tóm tắt/i }));
     expect(onCopy).toHaveBeenCalledTimes(1);
   });
 
