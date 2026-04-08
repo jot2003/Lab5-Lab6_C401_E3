@@ -6,7 +6,7 @@
 **Kênh cụ thể mình test:** [Web / Zalo / …]  
 **Ngày test:** [DD/MM/2026]
 
-> **Checklist nộp LMS (đúng template `README.md`):** `MaHocVien-HoTen-Day05.zip` → `canhan/ux-exercise/sketch.jpg` (hoặc `.pdf`) **+** `canhan/ux-exercise/analysis.md`. *(Screenshot: nice-to-have — có thể để trong cùng thư mục hoặc kèm `Neo_image/`.)*
+> **Checklist nộp LMS (đúng template `README.md`):** `MaHocVien-HoTen-Day05.zip` → `Individual/ux-exercise/sketch.jpg` (hoặc `.pdf`) **+** `Individual/ux-exercise/analysis.md`. *(Screenshot: nice-to-have — có thể để trong cùng thư mục hoặc kèm thư mục `Neo_image/`.)*
 
 ---
 
@@ -41,9 +41,9 @@
 
 **Screenshot cuộc chat NEO** (bằng chứng minh họa):
 
-![Screenshot chat NEO (1)](Neo_image/Screenshot%202026-04-08%20114149.png)
+![Screenshot chat NEO (1)](Neo_image/neo-chat-1.png)
 
-![Screenshot chat NEO (2)](Neo_image/Screenshot%202026-04-08%20114213.png)
+![Screenshot chat NEO (2)](Neo_image/neo-chat-2.png)
 
 **Tài liệu marketing / giới thiệu trợ lý** (tham chiếu phần gap marketing):
 

@@ -135,13 +135,14 @@ Nhóm 3–5 người, chia zone (~5 team/zone).
 ```
 MaHocVien-HoTen-Day05.zip
 │
-├── canhan/
+├── Individual/
 │   └── ux-exercise/               ← Ảnh chụp/scan sketch + ghi chú phân tích 4 paths
 │       ├── sketch.jpg/pdf         ← Sketch giấy (as-is + to-be)
 │       └── analysis.md            ← Ghi chú phân tích 4 paths + gap marketing vs thực tế
 │
-└── NhomXX-Room/                   ← VD: Nhom01-403
-    └── spec-draft.md              ← SPEC draft (file nhóm, mỗi người nộp giống nhau)
+└── group/                         ← Nhóm + phòng. VD: group/E3-C401/
+    └── E3-C401/
+        └── spec-draft.md          ← SPEC draft (file nhóm, mỗi người nộp giống nhau)
 ```
 
 ---
