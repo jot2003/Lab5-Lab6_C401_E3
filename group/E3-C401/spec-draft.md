@@ -1,12 +1,12 @@
-# Product SPEC Draft — VinUni StudyFlow AI
+﻿# Product SPEC Draft — VinAgent v2.0
 
 **Team:** E3 (C401)  
-**Track:** C - VinUni (AI cho giáo dục và vận hành trường học)  
-**Project:** VinUni StudyFlow AI - Trợ lý tối ưu lịch ôn thi theo năng lượng cá nhân  
+**Track:** C - AI cho giáo dục và vận hành trường học  
+**Project:** VinAgent — Cố vấn học vụ tự trị và tối ưu hóa đăng ký học phần  
 **Deadline Draft:** 23:59 ngày 08/04/2026
 
 **Thành viên nhóm:**
-- Hoang Kim Tri Thanh (2A202600372)
+- Hoàng Kim Trí Thành (2A202600372)
 - Đặng Đinh Tú Anh (2A202600019)
 - Quách Gia Được (2A202600423)
 - Phạm Quốc Dũng (2A202600490)
@@ -14,193 +14,164 @@
 
 ---
 
-## Problem Statement
+## Tóm tắt dự án
 
-Trong mùa thi, sinh viên VinUni thường lập lịch ôn tập theo deadline hoặc cảm tính, không tính đúng mức năng lượng theo ngày và độ khó môn học. Kết quả là học dồn, burnout, giảm hiệu quả và bỏ dở kế hoạch giữa chừng.  
-VinUni StudyFlow AI giúp sinh viên tạo lịch ôn thi linh hoạt theo mức năng lượng cá nhân, độ khó môn và mục tiêu điểm số, đồng thời cho phép chỉnh sửa nhanh khi AI chưa phù hợp.
+VinAgent là hệ thống Agentic AI đóng vai trò cố vấn học vụ cá nhân cho sinh viên VinUniversity, cho phép lên kế hoạch đăng ký học phần qua ngôn ngữ tự nhiên, tự kiểm tra điều kiện tiên quyết, phát hiện xung đột lịch và đề xuất phương án tối ưu.
+
+Phiên bản v2.0 tập trung 5 cải tiến chính:
+1. Social Learning Flywheel
+2. Scenario Planning (Plan A + Plan B)
+3. Advisor Brief tự động khi cần escalate sang cố vấn
+4. Demand Forecasting cho phòng đào tạo
+5. Hesitation Signals để học từ hành vi do dự
 
 ---
 
-## 1) AI Product Canvas (3 cột + Learning Signal)
+## 1) AI Product Canvas (bám sát template)
 
-|   | VALUE | TRUST | FEASIBILITY |
+## Canvas
+
+|   | Value | Trust | Feasibility |
 |---|-------|-------|-------------|
-| **Trả lời** | **User:** sinh viên VinUni trong mùa thi (đặc biệt tuần 2-4 trước finals). **Pain:** lịch thi dày, nhiều môn chồng nhau, không biết ưu tiên môn nào trước, dễ học quá sức. **Auto/Aug:** **Augmentation** - AI đề xuất lịch, sinh viên duyệt/sửa. **Value khi AI đúng:** có lịch học thực tế theo nhịp năng lượng cá nhân, giảm burnout và tăng khả năng bám kế hoạch. | **Precision vs Recall:** ưu tiên **Precision** (đừng gợi ý lịch vô lý hoặc quá tải). **Khi AI sai:** user bỏ app, mất niềm tin, quay lại lập lịch thủ công. **Trust recovery:** bật "Showing Work" giải thích tại sao AI phân bổ thời gian; cho phép "Editable Plan" kéo-thả ngay; có follow-up hỏi lại sau 1 ngày để hiệu chỉnh. | **Cost:** 0.004-0.015 USD/lượt gợi ý (LLM + scoring), có thể giảm bằng cache. **Latency:** mục tiêu <3 giây cho lần tạo lịch, <2 giây cho lần chỉnh sửa nhỏ. **Rủi ro chính:** AI hiểu sai độ khó môn, user khai báo năng lượng sai, lịch thi thay đổi đột xuất. |
-
-### Learning Signal (để model học theo cá nhân)
-
-| Signal type | Thu thập như thế nào | Dùng để cải thiện gì |
-|-------------|-----------------------|----------------------|
-| **Implicit** | user bỏ qua block học, đổi giờ học, tỉ lệ bám lịch theo ngày | học thói quen thực tế của từng người (sáng/tối, khả năng tập trung) |
-| **Explicit** | user đánh giá "Lịch hợp lý/không hợp lý", rating stress 1-5 | điều chỉnh trọng số workload và nghỉ ngơi |
-| **Correction** | user kéo-thả block, đổi môn, giảm/tăng thời lượng | fine-tune bộ quy tắc phân bổ thời gian theo profile cá nhân |
-
-**Flywheel:** càng nhiều correction theo từng user, lịch càng khớp nhịp sinh học của user đó; càng khớp thì adherence càng cao; adherence cao tạo thêm data chất lượng.
+| **Câu hỏi guide** | User nào? Pain gì? AI giải quyết gì mà cách hiện tại không giải được? | Khi AI sai thì user bị ảnh hưởng thế nào? User biết AI sai bằng cách nào? User sửa bằng cách nào? | Cost bao nhiêu/request? Latency bao lâu? Risk chính là gì? |
+| **Trả lời** | **User:** Sinh viên (đặc biệt tân sinh viên), chuyên viên tư vấn học vụ. **Pain:** Mất 2-4 giờ/kỳ để tra cứu và xếp lịch thủ công; dễ đăng ký nhầm môn; không phát hiện xung đột/điều kiện tiên quyết kịp thời. **AI giải quyết:** Chat tự nhiên -> Agent phân tích điều kiện, tạo 3 lịch tối ưu, hỗ trợ đăng ký và đưa phương án dự phòng khi dữ liệu thay đổi. | **Ưu tiên:** Precision cao hơn Recall vì đăng ký nhầm môn gây hậu quả trực tiếp. **Khi sai:** Sinh viên đăng ký lỗi, mất thời gian xử lý lại, giảm niềm tin. **Biết sai:** Thất bại khi submit, mismatch với SIS, hoặc kế hoạch không phù hợp preference. **Sửa:** Editable Plan, xác nhận bắt buộc trước action quan trọng, nút escalate sang cố vấn + Advisor Brief tự động. | **Cost ước tính:** GPT-4o-mini ~0.0002 USD/query (ước tính theo bản thử nghiệm), thêm chi phí hạ tầng Streamlit + logging. **Latency mục tiêu:** <3 giây cho đề xuất lịch. **Risk chính:** dữ liệu SIS không đồng bộ theo thời gian thực, hallucination mã môn/prereq, stale cache giờ cao điểm, thay đổi lịch thi phút chót. |
 
 ---
 
-## 2) User Stories với 4-path Experience (trọng tâm)
+## Automation hay augmentation?
 
-### Core feature
-Tạo lịch ôn thi 7 ngày dựa trên: lịch thi, độ khó môn, năng lượng theo khung giờ, mục tiêu điểm.
+☑ Automation — AI thực thi một số thao tác sau khi có xác nhận  
+☑ Augmentation — AI gợi ý, user quyết định cuối cùng
 
-### Path 1 - Happy path
-
-**Story:** Là sinh viên, tôi muốn nhận lịch ôn thi hợp lý để chỉ cần bấm "Chấp nhận" và học theo.
-
-**Flow:**
-1. User nhập lịch thi + mục tiêu GPA.
-2. AI tạo StudyFlow Plan theo môn khó/dễ + mức năng lượng trong ngày.
-3. UI hiển thị kế hoạch tuần: block học, block nghỉ, block review.
-4. User bấm **Accept Plan**.
-5. App gửi nhắc việc và check-in cuối ngày.
-
-**UI dùng:** Prompt -> Plan Card -> Accept -> Follow-up.
-
-### Path 2 - Low-confidence (<60%)
-
-**Story:** Là sinh viên, khi AI không chắc môn nào khó với tôi, tôi muốn hệ thống hỏi lại thay vì đoán.
-
-**Flow:**
-1. AI thấy thiếu dữ liệu cá nhân (vd chưa có lịch học cũ).
-2. Confidence <0.6 cho thứ tự ưu tiên môn.
-3. Hệ thống hỏi xác nhận:  
-   - "Môn Triết học hay môn Python khiến bạn tốn nhiều năng lượng hơn?"  
-   - "Bạn tập trung tốt nhất vào khung giờ nào?"
-4. User trả lời nhanh bằng chips.
-5. AI cập nhật lịch mới theo câu trả lời.
-
-**UI dùng:** Prompt clarifier + quick options + Follow-up confirm.
-
-### Path 3 - Failure/Wrong
-
-**Story:** Là sinh viên, khi AI xếp lịch quá nặng (vd 8 tiếng liên tục), tôi muốn sửa ngay không cần làm lại từ đầu.
-
-**Flow:**
-1. AI đề xuất lịch có block 8h liên tục (không nghỉ đủ).
-2. User bấm **Not realistic**.
-3. Mở **Editable Plan**:
-   - kéo-thả block
-   - giảm thời lượng
-   - thêm break
-4. AI tự cân bằng lại phần còn lại trong tuần.
-5. User lưu bản chỉnh sửa.
-
-**UI dùng:** Editable Plan (drag-and-drop), instant recalculation.
-
-### Path 4 - Loss of trust / Recovery
-
-**Story:** Là sinh viên, khi thấy lịch quá nặng và muốn bỏ app, tôi cần hiểu "vì sao AI đề xuất như vậy" để cân nhắc tiếp tục dùng.
-
-**Flow:**
-1. User bấm "Lịch này quá nặng".
-2. Hệ thống bật **Showing Work**:
-   - "Bạn còn 6 ngày đến thi môn X"
-   - "Điểm quiz gần nhất của bạn cho môn X là thấp"
-   - "Bạn đặt mục tiêu A nên cần thêm 2 giờ review"
-3. Hệ thống đưa 2 lựa chọn:
-   - "Giảm mục tiêu điểm để giảm tải"
-   - "Giữ mục tiêu, chia nhỏ thành 2 phiên/ngày"
-4. User chọn một phương án và cập nhật plan.
-
-**UI dùng:** Showing Work + recovery options + Follow-up sau 24h.
+**Justify:** VinAgent là mô hình lai. Phần phân tích và đề xuất lịch là augmentation để giữ quyền quyết định cho sinh viên; phần gửi lệnh đăng ký có thể automation có kiểm soát, bắt buộc qua bước xác nhận (human-in-the-loop) để giảm rủi ro.
 
 ---
 
-## 3) Evaluation Metrics
+## Learning signal
 
-### 3 chỉ số chính
+| # | Câu hỏi | Trả lời |
+|---|---------|---------|
+| 1 | User correction đi vào đâu? | Correction Log theo từng session: thay đổi môn, đổi khung giờ, rollback plan, lý do chỉnh sửa; dùng để cập nhật policy và re-ranking. |
+| 2 | Product thu signal gì để biết tốt lên hay tệ đi? | Implicit (lịch nào được chọn), Explicit (rating + comment), Correction (delta khi edit), Hesitation (hover_time > 8s nhưng không chọn), tỷ lệ kích hoạt Plan B. |
+| 3 | Data thuộc loại nào? | User-specific + Domain-specific + Real-time + Human-judgment (advisor feedback). |
 
-1. **Plan Adherence Rate**  
-   - Tỷ lệ user hoàn thành >=70% block học theo lịch mỗi tuần  
-   - Target: **>70%**
-
-2. **Correction Rate**  
-   - % block do AI đề xuất bị user sửa/xóa trong 24h đầu  
-   - Target: **<25%** sau tuần pilot thứ 2
-
-3. **Post-exam Satisfaction**  
-   - Điểm hài lòng sau mùa thi (thang 1-5)  
-   - Target: **>=4.0/5**
-
-### Threshold deploy
-
-- Độ chính xác dự báo thời gian học cần thiết cho từng môn: **>80%**
-- Nếu chưa đạt threshold thì chỉ triển khai dạng "beta opt-in" cho nhóm nhỏ.
-
-### Red flags (dừng/bảo trì)
-
-- Tỷ lệ user xóa lịch AI lập >30%
-- Correction rate tăng liên tiếp 3 ngày
-- User report "burnout tăng" >15% trong tuần
-- Latency >3 giây với thao tác chỉnh sửa đơn giản
+**Có marginal value không?**  
+Có. Dữ liệu hành vi đăng ký môn theo ngành tại VinUni là dữ liệu đặc thù nội bộ; càng nhiều kỳ đăng ký, model càng hiểu preference cộng đồng, làm giảm edit rate theo thời gian.
 
 ---
 
-## 4) Top 3 Failure Modes (Thư viện lỗi)
+## 2) User Stories — 5-path Experience (v2.0)
 
-| # | Trigger | Hậu quả | Mitigation |
-|---|---------|---------|------------|
-| 1 | User khai báo mức năng lượng sai (hoặc quá lạc quan) | Lịch học quá tải, dễ bỏ cuộc sau 1-2 ngày | Cho phép chỉnh năng lượng realtime theo ngày; check-in đầu ngày "hôm nay năng lượng thế nào?" để auto-replan |
-| 2 | Trường thay đổi lịch thi đột xuất | Plan cũ vô dụng, user mất tin | Đồng bộ dữ liệu lịch thi định kỳ qua API/file import; nếu phát hiện thay đổi thì auto notify + replan một chạm |
-| 3 | Hallucination về độ khó môn hoặc ước lượng sai effort | Gợi ý học quá ít cho môn khó, ảnh hưởng điểm thi | Cho user tự gán độ khó môn (1-5), ưu tiên dữ liệu thật (điểm quiz, lịch sử học), và bắt buộc hiển thị "confidence + lý do" |
+### Path 1 — Happy Path
+- Trigger: Sinh viên nhập yêu cầu cụ thể (ví dụ: “Lên lịch HK Xuân 2026, tránh sáng, phải có Giải tích 2”).
+- AI action: Parse intent -> query DB -> CSP scheduling -> đề xuất 3 lịch.
+- UI: Visual calendar, badge “Conflict-free”.
+- Outcome: Chọn Plan A và đăng ký thành công.
 
----
+### Path 2 — Scenario Planning (mới)
+- Trigger: AI phát hiện rủi ro lớp gần đầy.
+- AI action: Tạo đồng thời Plan A (tối ưu) + Plan B (dự phòng).
+- UI: Hai plan hiển thị song song, cảnh báo rõ rủi ro.
+- Outcome: Nếu A fail thì fallback B ngay, tránh đứt mạch trải nghiệm.
 
-## 5) ROI trong 3 kịch bản
+### Path 3 — Low-confidence
+- Trigger: Intent mơ hồ hoặc thiếu điều kiện.
+- AI action: Hỏi làm rõ thay vì tự thực thi.
+- UI: Clarification cards + xác nhận bắt buộc.
+- Outcome: Giảm overconfidence.
 
-### Giả định
+### Path 4 — Failure
+- Trigger: Submit thất bại do stale data hoặc conflict.
+- AI action: Tự phát hiện lỗi, chuyển sang phương án khả thi nhất tiếp theo.
+- UI: Error reason rõ + nút “Dùng Plan B”.
+- Outcome: Graceful failure.
 
-- 1 user lập lịch ôn thi trung bình 2-3 lần/tuần
-- Thời gian lập lịch thủ công hiện tại: ~90 phút/tuần
-- Tỷ lệ stress cao trong mùa thi ảnh hưởng trực tiếp tới hiệu suất học
-
-| Kịch bản | Chất lượng AI | Tác động chính | ROI định tính |
-|----------|----------------|----------------|---------------|
-| **Conservative** | AI như lịch điện tử thông minh, cá nhân hóa thấp | Tiết kiệm ~1 giờ/tuần cho mỗi sinh viên | ROI dương nhẹ, chủ yếu giảm thời gian lập kế hoạch |
-| **Realistic** | AI cá nhân hóa khá, correction vừa phải | Giảm ~20% mức stress tự báo cáo; tăng ~5% điểm trung bình môn | ROI tốt: cải thiện cả wellbeing lẫn kết quả học |
-| **Optimistic** | Flywheel hoạt động mạnh, dự báo effort rất chuẩn | Dự báo chính xác ~95% thời gian cần để đạt mục tiêu A theo môn | ROI rất cao: nền tảng có thể mở rộng thành trợ lý học tập cá nhân toàn trường |
-
----
-
-## 6) Mini AI Spec (1 trang nộp giám khảo)
-
-### VinUni StudyFlow AI - Mini Spec
-
-**Bài toán:** Sinh viên mùa thi bị quá tải do lập lịch theo deadline, không theo năng lượng thực tế.  
-**Giải pháp:** Trợ lý AI dạng augmentation tạo lịch ôn thi theo độ khó môn + mức năng lượng cá nhân, cho phép chỉnh sửa nhanh và giải thích quyết định.
-
-**Điểm khác biệt:**
-- Tối ưu theo "năng lượng cá nhân" thay vì chỉ deadline
-- Có Editable Plan (kéo-thả sửa lịch tức thì)
-- Có Showing Work để khôi phục trust khi user nghi ngờ
-
-**4-path UX:**
-- Happy: tạo lịch chuẩn, user accept ngay
-- Low-confidence: hỏi làm rõ môn nào tốn năng lượng hơn
-- Failure: lịch quá nặng -> user sửa trực tiếp
-- Loss of trust: AI giải thích lý do + đưa phương án nhẹ hơn
-
-**Eval gates:**
-- Adherence >70%
-- Effort prediction accuracy >80%
-- Nếu xóa lịch >30% -> dừng, tune lại model
-
-**Failure control:**
-- Realtime energy check-in
-- Auto replan khi lịch thi đổi
-- User-defined difficulty + confidence transparency
-
-**Success definition:**
-- Sinh viên bám lịch tốt hơn, stress thấp hơn, điểm thi cải thiện.
+### Path 5 — Trust Recovery
+- Trigger: User mất niềm tin sau lỗi.
+- AI action: Hiển thị reasoning + nguồn dữ liệu + timestamp + Advisor Brief nếu cần escalate.
+- UI: Reasoning panel + Human Escalation button.
+- Outcome: Khôi phục niềm tin bằng minh bạch.
 
 ---
 
-## Phân công đề xuất
+## 3) Năm cải tiến đột phá (v2.0)
 
-- Hoang Kim Tri Thanh (2A202600372): Tổng hợp Canvas + Learning Signal, chuẩn hóa cấu trúc SPEC, rà nội dung trước khi nộp.
-- Đặng Đinh Tú Anh (2A202600019): Thiết kế 4-path UX (Happy/Low-confidence/Failure/Recovery), flow màn hình và microcopy.
-- Quách Gia Được (2A202600423): Xây bộ Evaluation Metrics, threshold deploy, red flags và logic theo dõi dashboard.
-- Phạm Quốc Dũng (2A202600490): Xây Failure Modes library, đề xuất mitigation về thiết kế và kỹ thuật.
-- Nguyễn Thanh Nam (2A202600205): Hoàn thiện ROI 3 kịch bản, Mini AI Spec 1 trang, chuẩn bị pitch/demo script.
+1. **Social Learning Flywheel:** học từ pattern chỉnh sửa của cộng đồng theo ngành.
+2. **Scenario Planning (A/B):** luôn có phương án dự phòng.
+3. **Advisor Brief:** tự tóm tắt bối cảnh cho cố vấn khi escalate.
+4. **Demand Forecasting:** dự báo nhu cầu mở lớp từ draft sessions.
+5. **Hesitation Signals:** học từ hành vi do dự, không chỉ từ like/dislike.
+
+---
+
+## 4) Evaluation Metrics (v2.0)
+
+| Chỉ số | Ngưỡng deploy | Red flag | Cách đo |
+|---|---|---|---|
+| Schedule Precision Rate | >85% | <70% trong 24h liên tiếp | So sánh output AI với CSP validator |
+| Manual Edit Rate | <25% | >40% | Theo dõi số lần edit/session |
+| Time-to-Register | <8 phút | >20 phút | first_message -> register_success |
+| Plan B Activation Rate | <15% sessions | >30% | Đếm session fallback B |
+| Hesitation Signal Capture | >500/kỳ | <50/kỳ | Đếm hover_time >8s không chọn |
+
+---
+
+## 5) Top Failure Modes (v2.0)
+
+| Failure mode | Trigger | Hậu quả | Mitigation |
+|---|---|---|---|
+| Prerequisite Hallucination | LLM tự suy diễn prereq | Đăng ký sai, bị hủy môn | Bắt buộc tool call get_prerequisites + validator độc lập |
+| Stale Schedule Data | Cache cũ giờ cao điểm | Plan fail khi submit | TTL 5 phút + timestamp + Plan B |
+| Ambiguous Intent Overconfidence | Confidence chưa đủ nhưng auto-run | Sai nguyện vọng | Threshold auto-action = 80%, confirm bắt buộc |
+| Social Signal Poisoning | Pattern edit bất thường | Lệch community weights | Outlier detection, chỉ học khi >5% population |
+| Advisor Brief Data Leak | Gửi nhầm thông tin nhạy cảm | Rủi ro riêng tư/pháp lý | Role-based access + giới hạn dữ liệu trong brief |
+
+---
+
+## 6) ROI — 3 kịch bản + Strategic ROI
+
+Giả định: ~3,000 sinh viên, 2 kỳ/năm, hiện mất ~3 giờ/sinh viên/kỳ.
+
+| Kịch bản | Adoption/Chất lượng | Giờ tiết kiệm/năm | Tác động |
+|---|---|---|---|
+| Conservative | 20% SV, Precision ~70%, Edit cao | ~1,800 giờ | Giảm tải cơ bản; đủ dữ liệu cho pilot forecasting |
+| Realistic | 50% SV, Precision ~87%, Edit ~22% | ~7,500 giờ | ROI tốt; giảm workload tư vấn; dashboard có giá trị vận hành |
+| Optimistic | 90% SV, Precision ~93%, Edit ~10% | ~15,120 giờ | Tạo lợi thế chiến lược: dự báo mở lớp sớm, tối ưu toàn trường |
+
+**Learning Flywheel Effect:** Qua 2-3 kỳ, Edit Rate giảm dần nhờ cộng dồn dữ liệu hành vi và correction; ROI tăng theo thời gian mà không tăng chi phí tuyến tính.
+
+---
+
+## 7) Mini AI Spec (1 trang cho giám khảo)
+
+- **Vấn đề:** Đăng ký học phần thủ công tốn thời gian, dễ sai điều kiện.
+- **Giải pháp:** VinAgent v2.0 dùng Agentic workflow để đề xuất, xác nhận và thực thi đăng ký có kiểm soát.
+- **Stack:** GPT-4o-mini + LangGraph StateGraph + SQLite mock + CSP + Streamlit.
+- **Trust & safety:** Confidence threshold, confirm bắt buộc, reasoning panel, Plan A/B, escalate + advisor brief.
+- **Metric gates:** Precision >85%, Edit <25%, TTR <8 phút.
+- **ROI realistic:** tiết kiệm lớn cho sinh viên và giảm tải tư vấn học vụ.
+
+---
+
+## 8) Phân công nhiệm vụ (bổ sung)
+
+- **Đặng Đinh Tú Anh (2A202600019) — Team Lead & AI Core**
+  - Quản lý backlog, viết spec, thiết kế prompt/LangGraph, triển khai confidence scoring.
+  - Phụ trách cải tiến #5 Hesitation Signals.
+
+- **Quách Gia Được (2A202600423) — Backend Engineer**
+  - Xây dựng DB mock lớp học, CSP algorithm, API đăng ký + prerequisite validator, TTL cache.
+  - Phụ trách cải tiến #4 Demand Forecasting.
+
+- **Phạm Quốc Dũng (2A202600490) — Frontend & UX Engineer**
+  - Streamlit UI, visual calendar, editable plan, confidence badge, reasoning panel.
+  - Phụ trách cải tiến #2 Scenario Planning UI (Plan A/B).
+
+- **Nguyễn Thanh Nam (2A202600205) — ML & Learning Systems**
+  - Correction log system, pipeline signal, bộ metrics và cảnh báo red flag.
+  - Phụ trách cải tiến #1 Social Learning Flywheel.
+
+- **Hoang Kim Tri Thanh (2A202600372) — Integration & Presentation**
+  - Tích hợp end-to-end, human escalation flow, tính ROI 3 kịch bản, chuẩn bị demo.
+  - Phụ trách cải tiến #3 Advisor Brief.
 
