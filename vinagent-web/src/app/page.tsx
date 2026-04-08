@@ -10,6 +10,7 @@ import {
   ReasoningPanel,
   Toast,
 } from "@/components/vinagent-ui";
+import { evaluatePlannerDecision } from "@/lib/planner";
 
 type FlowState =
   | "idle"
@@ -37,6 +38,11 @@ export default function Home() {
   const [selectedPlan, setSelectedPlan] = useState<"A" | "B" | null>(null);
   const [usePlanB, setUsePlanB] = useState(false);
   const [isEdited, setIsEdited] = useState(false);
+  const [reasonList, setReasonList] = useState<string[]>([
+    "Ban yeu cau tranh lich sang va giu CECS101 trong hoc ky nay.",
+    "SIS snapshot cho thay lop CECS101 sang chi con 2 cho.",
+    "Confidence va fallback duoc danh dau de tranh overconfidence.",
+  ]);
   const [toast, setToast] = useState<{ title: string; message: string } | null>(
     null,
   );
@@ -68,35 +74,17 @@ export default function Home() {
   }, [isEdited]);
 
   function handleGenerate() {
-    const normalized = prompt.trim().toLowerCase();
-    if (!normalized) {
-      setFlow("lowConfidence");
-      setToast({
-        title: "Need clarification",
-        message: "Vui long nhap them rang buoc mon hoc de tao plan phu hop.",
-      });
-      return;
-    }
+    const decision = evaluatePlannerDecision(prompt);
+    setReasonList([
+      ...decision.reasons,
+      `Tool snapshot: ${decision.toolSnapshot.sourceTimestamp}, data ${
+        decision.toolSnapshot.dataFresh ? "fresh" : "stale"
+      }.`,
+    ]);
 
-    if (
-      normalized.includes("khong chac") ||
-      normalized.includes("khong ro") ||
-      normalized.includes("help")
-    ) {
-      setFlow("lowConfidence");
-      setToast({
-        title: "Low confidence detected",
-        message: "Can xac nhan them preference truoc khi de xuat plan cuoi.",
-      });
-      return;
-    }
-
-    if (
-      normalized.includes("fail") ||
-      normalized.includes("stale") ||
-      normalized.includes("high risk")
-    ) {
+    if (decision.flow === "failure") {
       setFlow("failure");
+      setUsePlanB(decision.needsPlanBFallback);
       setToast({
         title: "High risk scenario",
         message: "Plan A co the that bai do du lieu stale. Plan B da san sang.",
@@ -104,11 +92,21 @@ export default function Home() {
       return;
     }
 
+    if (decision.flow === "lowConfidence") {
+      setFlow("lowConfidence");
+      setUsePlanB(decision.needsPlanBFallback);
+      setToast({
+        title: "Low confidence detected",
+        message: "Can xac nhan them preference truoc khi de xuat plan cuoi.",
+      });
+      return;
+    }
+
     setFlow("happy");
-    setUsePlanB(false);
+    setUsePlanB(decision.needsPlanBFallback);
     setToast({
       title: "Plans generated",
-      message: "Da tao 2 phuong an conflict-free de ban xac nhan.",
+      message: `Da tao 2 phuong an. Confidence score: ${decision.confidenceScore}/100.`,
     });
   }
 
@@ -200,13 +198,7 @@ export default function Home() {
             Trust & Recovery
           </h2>
           <ReasoningPanel
-            reasons={[
-              "Ban yeu cau tranh lich sang va giu CECS101 trong hoc ky nay.",
-              usePlanB
-                ? "Plan A that bai do stale capacity; he thong da kich hoat Plan B."
-                : "SIS snapshot cho thay lop CECS101 sang chi con 2 cho.",
-              "Confidence va fallback duoc danh dau de tranh overconfidence.",
-            ]}
+            reasons={reasonList}
           />
           {(flow === "lowConfidence" || flow === "idle") && (
             <ClarificationCard
