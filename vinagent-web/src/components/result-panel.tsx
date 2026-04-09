@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { AdvisorBriefSheet } from "./advisor-brief-sheet";
@@ -160,54 +159,62 @@ export function ResultPanel() {
       <RegisterDialog />
       <GroupInviteSheet />
 
-      <div className="flex h-full flex-col overflow-hidden">
-        <div className="flex items-center justify-between border-b border-border/50 px-4 py-2.5">
-          <Tabs value={store.currentView} onValueChange={(v) => store.setCurrentView(v as "calendar" | "list")}>
-            <TabsList className="h-7 bg-primary/10 border border-primary/20">
-              <TabsTrigger
-                value="calendar"
-                className="text-xs px-2.5 text-primary/70 data-[state=active]:bg-primary data-[state=active]:text-white"
-              >
-                Lịch học
-              </TabsTrigger>
-              <TabsTrigger
-                value="list"
-                className="text-xs px-2.5 text-primary/70 data-[state=active]:bg-primary data-[state=active]:text-white"
-              >
-                Danh sách
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              className={cn(
-                "text-xs h-7 transition-colors",
-                store.selectedPlan === "A"
-                  ? "bg-primary text-white hover:bg-primary/90"
-                  : "bg-transparent border border-primary/30 text-primary hover:bg-primary hover:text-white"
-              )}
-              onClick={() => store.acceptPlan("A")}
-            >
-              Plan A
-            </Button>
-            <Button
-              size="sm"
-              className={cn(
-                "text-xs h-7 transition-colors",
-                store.selectedPlan === "B"
-                  ? "bg-gold text-foreground hover:bg-gold/90"
-                  : "bg-transparent border border-primary/30 text-primary hover:bg-gold hover:text-foreground"
-              )}
-              onClick={() => store.acceptPlan("B")}
-            >
-              Plan B
-            </Button>
-          </div>
-        </div>
+      {/* Split: main calendar area + right info sidebar */}
+      <div className="flex h-full overflow-hidden">
 
-        <ScrollArea className="flex-1">
-          <div className="space-y-4 p-4">
+        {/* ── Main calendar/list column ── */}
+        <div className="flex flex-1 flex-col overflow-hidden min-w-0">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between border-b border-border/50 px-4 py-2.5 shrink-0">
+            <Tabs value={store.currentView} onValueChange={(v) => store.setCurrentView(v as "calendar" | "list")}>
+              <TabsList className="h-7 bg-primary/10 border border-primary/20">
+                <TabsTrigger
+                  value="calendar"
+                  className="text-xs px-2.5 text-primary/70 data-[state=active]:bg-primary data-[state=active]:text-white"
+                >
+                  Lịch học
+                </TabsTrigger>
+                <TabsTrigger
+                  value="list"
+                  className="text-xs px-2.5 text-primary/70 data-[state=active]:bg-primary data-[state=active]:text-white"
+                >
+                  Danh sách
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <div className="flex gap-1">
+              <Button
+                size="sm"
+                className={cn(
+                  "text-xs h-7 transition-colors",
+                  store.selectedPlan === "A"
+                    ? "bg-primary text-white hover:bg-primary/90"
+                    : "bg-transparent border border-primary/30 text-primary hover:bg-primary hover:text-white"
+                )}
+                onClick={() => store.acceptPlan("A")}
+              >
+                Plan A
+              </Button>
+              <Button
+                size="sm"
+                className={cn(
+                  "text-xs h-7 transition-colors",
+                  store.selectedPlan === "B"
+                    ? "bg-gold text-foreground hover:bg-gold/90"
+                    : "bg-transparent border border-primary/30 text-primary hover:bg-gold hover:text-foreground"
+                )}
+                onClick={() => store.acceptPlan("B")}
+              >
+                Plan B
+              </Button>
+            </div>
+          </div>
+
+          {/* Scrollable calendar/list area */}
+          <div
+            className="flex-1 overflow-y-auto p-4 space-y-4"
+            style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.6 0.16 23 / 0.3) transparent" }}
+          >
             {store.planACourses.length === 0 && store.planBCourses.length === 0 ? (
               <div className="flex h-32 items-center justify-center text-xs text-muted-foreground">
                 Agent đang tạo kế hoạch...
@@ -221,40 +228,67 @@ export function ResultPanel() {
               />
             ) : (
               <div className="space-y-4">
-              {store.planACourses.length > 0 && (
-                <div>
-                  <h4 className="mb-2 text-sm font-bold text-primary uppercase tracking-wide">
-                    Plan A — Tối ưu
-                  </h4>
-                  <PlanListView courses={store.planACourses} plan="A" />
-                </div>
-              )}
-              {store.planBCourses.length > 0 && (store.usePlanB || store.flow === "failure" || store.flow === "recovery") && (
-                <div>
-                  <h4 className="mb-2 text-sm font-bold text-primary uppercase tracking-wide">
-                    Plan B — Dự phòng
-                  </h4>
-                  <PlanListView courses={store.planBCourses} plan="B" />
-                </div>
-              )}
+                {store.planACourses.length > 0 && (
+                  <div>
+                    <h4 className="mb-2 text-sm font-bold text-primary uppercase tracking-wide">
+                      Plan A — Tối ưu
+                    </h4>
+                    <PlanListView courses={store.planACourses} plan="A" />
+                  </div>
+                )}
+                {store.planBCourses.length > 0 && (store.usePlanB || store.flow === "failure" || store.flow === "recovery") && (
+                  <div>
+                    <h4 className="mb-2 text-sm font-bold text-primary uppercase tracking-wide">
+                      Plan B — Dự phòng
+                    </h4>
+                    <PlanListView courses={store.planBCourses} plan="B" />
+                  </div>
+                )}
               </div>
             )}
 
+            <ReasoningPanel reasons={store.reasons} citations={store.citations} />
+            <RedFlagBanner flags={store.redFlags} onAcknowledge={store.acknowledgeFlags} />
+          </div>{/* end scrollable area */}
+        </div>{/* end main column */}
+
+        {/* ── Right info sidebar ── */}
+        <div
+          className="w-[200px] shrink-0 border-l border-border/50 flex flex-col overflow-y-auto bg-card/50"
+          style={{ scrollbarWidth: "thin", scrollbarColor: "oklch(0.6 0.16 23 / 0.2) transparent" }}
+        >
+          <div className="p-3 space-y-3">
             <ConfidenceBar score={store.confidenceScore} />
 
-            <ReasoningPanel reasons={store.reasons} citations={store.citations} />
+            {store.citations.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground px-0.5">
+                  Nguồn tham khảo
+                </p>
+                {store.citations.map((c) => (
+                  <div
+                    key={c.id}
+                    className="rounded-md border border-primary/15 bg-primary/5 p-2 text-[10px] leading-snug"
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="flex size-4 shrink-0 items-center justify-center rounded bg-primary text-[9px] font-bold text-white">
+                        {c.id}
+                      </span>
+                      <span className="text-primary font-semibold truncate">{c.title}</span>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed line-clamp-3">{c.detail}</p>
+                  </div>
+                ))}
+              </div>
+            )}
 
-            <RedFlagBanner flags={store.redFlags} onAcknowledge={store.acknowledgeFlags} />
+            <Separator className="opacity-20" />
 
-            {store.citations.length > 0 && <CitationList citations={store.citations} />}
-
-            <Separator className="opacity-30" />
-
-            <div className="flex flex-wrap gap-2 pb-4">
+            <div className="space-y-1.5">
               {canRegister && (
                 <Button
                   size="sm"
-                  className="text-xs gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="w-full text-xs gap-1.5 bg-primary text-white hover:bg-primary/90 h-8"
                   onClick={() => store.openRegisterDialog()}
                 >
                   <CheckCircle2 className="size-3" />
@@ -265,37 +299,38 @@ export function ResultPanel() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs gap-1.5"
+                  className="w-full text-xs gap-1.5 h-8"
                   onClick={() => store.openGroupInvite()}
                 >
                   <Users className="size-3" />
-                  Mời bạn đăng ký cùng
+                  Mời bạn cùng đăng ký
                 </Button>
               )}
               {store.selectedPlan && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs gap-1.5"
+                  className="w-full text-xs gap-1.5 h-8"
                   onClick={() => store.openEditPlan()}
                 >
                   <Pencil className="size-3" />
-                  Chỉnh sửa kế hoạch
+                  Chỉnh sửa plan
                 </Button>
               )}
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs text-danger gap-1.5"
+                className="w-full text-xs text-danger gap-1.5 h-8"
                 onClick={store.escalate}
               >
                 <UserRound className="size-3" />
-                Chuyển cố vấn học vụ
+                Cố vấn học vụ
               </Button>
             </div>
           </div>
-        </ScrollArea>
-      </div>
+        </div>{/* end right sidebar */}
+
+      </div>{/* end split row */}
     </>
   );
 }

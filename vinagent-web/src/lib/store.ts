@@ -21,6 +21,8 @@ export type CourseSlot = {
   startHour: number;
   endHour: number;
   room?: string;
+  slotsRemaining?: number;
+  seatRisk?: "low" | "medium" | "high";
 };
 
 export type RegisterStatus = "idle" | "loading" | "success" | "failed";
@@ -109,7 +111,7 @@ function makeStepId() {
 }
 
 function toCourseSlots(
-  plan: { code: string; name: string; day: string; startHour: number; endHour: number; room: string }[] | null
+  plan: { code: string; name: string; day: string; startHour: number; endHour: number; room: string; slotsRemaining?: number; seatRisk?: string }[] | null
 ): CourseSlot[] {
   if (!plan) return [];
   return plan.map((s) => ({
@@ -119,6 +121,8 @@ function toCourseSlots(
     startHour: s.startHour,
     endHour: s.endHour,
     room: s.room,
+    slotsRemaining: s.slotsRemaining,
+    seatRisk: s.seatRisk as CourseSlot["seatRisk"],
   }));
 }
 
@@ -247,8 +251,8 @@ export const useBKAgent = create<BKAgentState>()(
                   type DoneEvent = {
                     text: string; citations: Citation[]; confidenceScore: number;
                     flow: "happy" | "lowConfidence" | "failure";
-                    planA: { code: string; name: string; day: string; startHour: number; endHour: number; room: string }[] | null;
-                    planB: { code: string; name: string; day: string; startHour: number; endHour: number; room: string }[] | null;
+                    planA: { code: string; name: string; day: string; startHour: number; endHour: number; room: string; slotsRemaining?: number; seatRisk?: string }[] | null;
+                    planB: { code: string; name: string; day: string; startHour: number; endHour: number; room: string; slotsRemaining?: number; seatRisk?: string }[] | null;
                     suggestions?: string[];
                   };
                   const data = event as unknown as DoneEvent;
