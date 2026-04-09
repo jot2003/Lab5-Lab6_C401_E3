@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { AlertTriangle, Pencil, UserRound } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useVinAgent, PLAN_A_COURSES, PLAN_B_COURSES } from "@/lib/store";
+import { useVinAgent } from "@/lib/store";
 import { VisualCalendar } from "./visual-calendar";
 import { CitationList } from "./citation-popover";
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ function RedFlagBanner({ flags, onAcknowledge }: { flags: string[]; onAcknowledg
   );
 }
 
-function PlanListView({ courses, plan }: { courses: typeof PLAN_A_COURSES; plan: "A" | "B" }) {
+function PlanListView({ courses, plan }: { courses: { code: string; name: string; day: string; startHour: number; endHour: number; room?: string }[]; plan: "A" | "B" }) {
   return (
     <div className="space-y-1.5">
       {courses.map((c, idx) => (
@@ -151,27 +151,33 @@ export function ResultPanel() {
 
       <ScrollArea className="flex-1">
         <div className="space-y-4 p-4">
-          {store.currentView === "calendar" ? (
+          {store.planACourses.length === 0 && store.planBCourses.length === 0 ? (
+            <div className="flex h-32 items-center justify-center text-xs text-muted-foreground">
+              Agent đang tạo kế hoạch...
+            </div>
+          ) : store.currentView === "calendar" ? (
             <VisualCalendar
-              planA={PLAN_A_COURSES}
-              planB={PLAN_B_COURSES}
+              planA={store.planACourses}
+              planB={store.planBCourses}
               showPlanB={store.usePlanB || store.flow === "failure" || store.flow === "recovery"}
               selectedPlan={store.selectedPlan}
             />
           ) : (
             <div className="space-y-4">
-              <div>
-                <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  Plan A — Tối ưu
-                </h4>
-                <PlanListView courses={PLAN_A_COURSES} plan="A" />
-              </div>
-              {(store.usePlanB || store.flow === "failure" || store.flow === "recovery") && (
+              {store.planACourses.length > 0 && (
+                <div>
+                  <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Plan A — Tối ưu
+                  </h4>
+                  <PlanListView courses={store.planACourses} plan="A" />
+                </div>
+              )}
+              {store.planBCourses.length > 0 && (store.usePlanB || store.flow === "failure" || store.flow === "recovery") && (
                 <div>
                   <h4 className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     Plan B — Dự phòng
                   </h4>
-                  <PlanListView courses={PLAN_B_COURSES} plan="B" />
+                  <PlanListView courses={store.planBCourses} plan="B" />
                 </div>
               )}
             </div>

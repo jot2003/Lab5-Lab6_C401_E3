@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 import type { Citation } from "./citations";
-import { evaluatePlannerDecision, type PlannerDecision, type ReasonWithCitation } from "./planner";
+import type { ChatResponseBody } from "@/app/api/chat/route";
 
 export type FlowState = "idle" | "happy" | "lowConfidence" | "failure" | "recovery" | "escalated";
 export type ConfidenceLevel = "high" | "medium" | "low";
@@ -32,13 +32,15 @@ interface VinAgentState {
   confidenceScore: number;
   autoActionEnabled: boolean;
   redFlags: string[];
-  reasons: ReasonWithCitation[];
+  reasons: { text: string; citationIds: number[] }[];
   citations: Citation[];
   toast: { title: string; message: string } | null;
-  lastDecision: PlannerDecision | null;
   messages: ChatMessage[];
   currentView: "calendar" | "list";
   isTyping: boolean;
+  planACourses: CourseSlot[];
+  planBCourses: CourseSlot[];
+  chatHistory: { role: "user" | "model"; text: string }[];
 
   setPrompt: (prompt: string) => void;
   setToast: (toast: { title: string; message: string } | null) => void;
@@ -58,23 +60,19 @@ function makeId() {
   return `msg-${++msgCounter}-${Date.now()}`;
 }
 
-// Plan A — Tối ưu (HK 20252): lịch chiều-sáng, chỗ ngồi còn nhiều
-// Nguồn: TKB20252-FULL — slot thực tế từ SIS VinUniversity
-export const PLAN_A_COURSES: CourseSlot[] = [
-  { code: "IT3010E", name: "Cấu trúc dữ liệu và giải thuật", day: "Thu", startHour: 14, endHour: 17.5, room: "D7-201" },   // classId 168276 — 76/90
-  { code: "IT3020E", name: "Toán rời rạc", day: "Tue", startHour: 8.5, endHour: 12, room: "C7-115" },                        // classId 167679 — 72/95
-  { code: "IT3100E", name: "Lập trình hướng đối tượng", day: "Mon", startHour: 9.5, endHour: 12, room: "D9-501" },           // classId 166241 — 134/140 ⚠ gần đầy
-  { code: "IT3080",  name: "Mạng máy tính", day: "Mon", startHour: 12.5, endHour: 15, room: "B1-405" },                      // classId 761897 — 17/40
-];
-
-// Plan B — Dự phòng (HK 20252): fallback khi Plan A hết chỗ
-// IT3100E chuyển sang slot chiều còn nhiều chỗ; DSA đổi buổi sáng
-export const PLAN_B_COURSES: CourseSlot[] = [
-  { code: "IT3010E", name: "Cấu trúc dữ liệu và giải thuật", day: "Wed", startHour: 7, endHour: 10, room: "C7-115" },        // classId 167940 — 96/100 ⚠ gần đầy
-  { code: "IT3020E", name: "Toán rời rạc", day: "Mon", startHour: 7, endHour: 10, room: "C7-115" },                           // classId 167683 — 80/95
-  { code: "IT3100E", name: "Lập trình hướng đối tượng", day: "Thu", startHour: 15, endHour: 17.5, room: "B1-206" },          // classId 761926 — 14/40 ✓
-  { code: "IT3080",  name: "Mạng máy tính", day: "Tue", startHour: 7, endHour: 9, room: "D9-106" },                           // classId 168467 — 91/120
-];
+function toCourseSlots(
+  plan: { code: string; name: string; day: string; startHour: number; endHour: number; room: string }[] | null
+): CourseSlot[] {
+  if (!plan) return [];
+  return plan.map((s) => ({
+    code: s.code,
+    name: s.name,
+    day: s.day as CourseSlot["day"],
+    startHour: s.startHour,
+    endHour: s.endHour,
+    room: s.room,
+  }));
+}
 
 export const useVinAgent = create<VinAgentState>((set, get) => ({
   prompt: "",
@@ -88,63 +86,101 @@ export const useVinAgent = create<VinAgentState>((set, get) => ({
   reasons: [],
   citations: [],
   toast: null,
-  lastDecision: null,
   messages: [],
   currentView: "calendar",
   isTyping: false,
+  planACourses: [],
+  planBCourses: [],
+  chatHistory: [],
 
   setPrompt: (prompt) => set({ prompt }),
   setToast: (toast) => set({ toast }),
   setCurrentView: (view) => set({ currentView: view }),
 
-  generate: (inputPrompt) => {
+  generate: async (inputPrompt) => {
     const userMsg: ChatMessage = { id: makeId(), role: "user", text: inputPrompt, timestamp: new Date() };
-    set((s) => ({ messages: [...s.messages, userMsg], isTyping: true }));
+    set((s) => ({
+      messages: [...s.messages, userMsg],
+      isTyping: true,
+      prompt: "",
+    }));
 
-    const decision = evaluatePlannerDecision(inputPrompt);
-    const flags: string[] = [];
-    if (!decision.toolSnapshot.dataFresh) flags.push("Dữ liệu SIS đã cũ (vượt quá 5 phút), cần làm mới.");
-    if (decision.confidenceScore < 70) flags.push("Độ tin cậy dưới 70, chưa đủ điều kiện tự động hành động.");
-    if (decision.toolSnapshot.seatRisk === "high") flags.push("Rủi ro hết chỗ cao, ưu tiên Plan B.");
+    const currentHistory = get().chatHistory;
 
-    let assistantText: string;
-    let flow: FlowState;
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: inputPrompt,
+          history: currentHistory,
+        }),
+      });
 
-    if (decision.flow === "failure") {
-      flow = "failure";
-      assistantText = `Đã phân tích yêu cầu của bạn. Phát hiện một số rủi ro cần lưu ý:\n\n` +
-        decision.reasons.map((r) => `• ${r.text} [${r.citationIds.join(",")}]`).join("\n") +
-        `\n\nĐiểm tin cậy: ${decision.confidenceScore}/100. Plan B đã sẵn sàng để chuyển đổi.`;
-    } else if (decision.flow === "lowConfidence") {
-      flow = "lowConfidence";
-      assistantText = `Đã nhận yêu cầu, nhưng cần làm rõ thêm:\n\n` +
-        decision.reasons.map((r) => `• ${r.text} [${r.citationIds.join(",")}]`).join("\n") +
-        `\n\nVui lòng bổ sung thông tin để hệ thống tạo kế hoạch chính xác hơn.`;
-    } else {
-      flow = "happy";
-      assistantText = `Đã tạo kế hoạch đăng ký học phần thành công!\n\n` +
-        decision.reasons.map((r) => `• ${r.text} [${r.citationIds.join(",")}]`).join("\n") +
-        `\n\nĐiểm tin cậy: ${decision.confidenceScore}/100. Bạn có thể xem lịch học bên phải và xác nhận phương án.`;
-    }
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({ error: "Network error" }));
+        throw new Error(errBody.error || `HTTP ${res.status}`);
+      }
 
-    const allCitIds = decision.citations.map((c) => c.id);
-    const assistantMsg: ChatMessage = { id: makeId(), role: "assistant", text: assistantText, citationIds: allCitIds, timestamp: new Date() };
+      const data: ChatResponseBody = await res.json();
 
-    setTimeout(() => {
-      set({
-        messages: [...get().messages, assistantMsg],
+      const flags: string[] = [];
+      if (data.confidenceScore < 70) flags.push("Độ tin cậy dưới 70, chưa đủ điều kiện tự động hành động.");
+
+      const hasHighRisk = data.text.includes("rủi ro") && data.text.includes("hết chỗ");
+      if (hasHighRisk) flags.push("Phát hiện rủi ro hết chỗ cao, nên xem Plan B.");
+
+      const needsPlanB = data.flow === "failure" || data.flow === "lowConfidence" || hasHighRisk;
+
+      const allCitIds = data.citations.map((c) => c.id);
+      const assistantMsg: ChatMessage = {
+        id: makeId(),
+        role: "assistant",
+        text: data.text,
+        citationIds: allCitIds,
+        timestamp: new Date(),
+      };
+
+      const planA = toCourseSlots(data.planA);
+      const planB = toCourseSlots(data.planB);
+
+      set((s) => ({
+        messages: [...s.messages, assistantMsg],
         isTyping: false,
-        flow,
-        confidenceScore: decision.confidenceScore,
+        flow: data.flow,
+        confidenceScore: data.confidenceScore,
         redFlags: flags,
-        reasons: decision.reasons,
-        citations: decision.citations,
-        lastDecision: decision,
-        usePlanB: decision.needsPlanBFallback,
+        reasons: data.citations.map((c) => ({
+          text: c.detail,
+          citationIds: [c.id],
+        })),
+        citations: data.citations,
+        usePlanB: needsPlanB,
         autoActionEnabled: false,
         toast: null,
-      });
-    }, 600);
+        planACourses: planA.length > 0 ? planA : s.planACourses,
+        planBCourses: planB.length > 0 ? planB : s.planBCourses,
+        chatHistory: [
+          ...s.chatHistory,
+          { role: "user" as const, text: inputPrompt },
+          { role: "model" as const, text: data.text },
+        ],
+      }));
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : "Lỗi không xác định";
+      const assistantMsg: ChatMessage = {
+        id: makeId(),
+        role: "assistant",
+        text: `Xin lỗi, đã xảy ra lỗi khi xử lý yêu cầu: ${errorMsg}. Vui lòng thử lại.`,
+        timestamp: new Date(),
+      };
+      set((s) => ({
+        messages: [...s.messages, assistantMsg],
+        isTyping: false,
+        flow: "failure",
+        toast: { title: "Lỗi", message: errorMsg },
+      }));
+    }
   },
 
   acceptPlan: (plan) => {
@@ -203,13 +239,10 @@ export const useVinAgent = create<VinAgentState>((set, get) => ({
   },
 
   clarify: (choice) => {
-    const text = choice === "avoidMorning" ? "Đã ghi nhận: ưu tiên các lớp sau 9 giờ sáng." : "Đã ghi nhận: ưu tiên giữ lịch học cùng nhóm bạn.";
-    const msg: ChatMessage = { id: makeId(), role: "assistant", text, timestamp: new Date() };
-    set((s) => ({
-      messages: [...s.messages, msg],
-      flow: "happy",
-      toast: { title: "Đã ghi nhận ưu tiên", message: text },
-    }));
+    const text = choice === "avoidMorning"
+      ? "Tránh lịch sáng, tôi muốn xếp lịch ưu tiên các lớp sau 9 giờ sáng."
+      : "Giữ lớp cùng nhóm bạn, ưu tiên các lớp đông sinh viên.";
+    get().generate(text);
   },
 
   confidenceLevel: () => {
