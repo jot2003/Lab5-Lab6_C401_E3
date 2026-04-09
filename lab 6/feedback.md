@@ -1,0 +1,14 @@
+# Tổng hợp feedback cho nhóm E3
+
+Nguồn gốc: chuyển đổi nguyên văn từ `lab 6/feedback.csv` sang Markdown để dễ đọc.  
+Lưu ý: nội dung các cột đánh giá được giữ nguyên; chỉ chỉnh lại cột phản hồi của nhóm E3 theo văn phong lịch sự, chuyên nghiệp.
+
+| Dấu thời gian | Nhóm đánh giá | Nhóm được đánh giá | Problem-solution fit | AI product thinking | Demo quality | 1 điều team đã làm tốt | Gợi ý cải thiện | Phản hồi của nhóm E3 (đã biên tập) |
+|---|---|---|---:|---:|---:|---|---|---|
+| 09/04/2026 16:28:13 | VinUni F1 | VinUni E3 | 4 | 4 | 5 | Giao diện dễ tương tác, workflow hợp lý | Cùng 1 cuộc hội thoại nên chỉ tra lại hồ sơ sinh viên 1 lần lúc bắt đầu; các lượt sau không nên tra cứu lại. | Cảm ơn nhóm bạn đã góp ý rất sát. Nhóm mình đã ghi nhận và đã tối ưu theo hướng chỉ đọc hồ sơ một lần cho mỗi phiên hội thoại. |
+| 09/04/2026 16:56:49 | Vinuni-F1 | Vinuni-E3 | 3 | 4 | 5 | Demo đẹp, đầy đủ tính năng, sản phẩm sáng tạo, llm mượt mà. Luồng hoạt động rõ ràng, có metric cụ thể với cách tính rõ ràng. | Khi trình bày, các bạn chưa giải thích được flow. Còn bị confuse với các pain point, problem, thuần dev. | Cảm ơn phản hồi của bạn. Nhóm mình đã cập nhật lại cấu trúc trình bày để tách rõ pain point, problem statement và flow demo theo từng bước. |
+| 09/04/2026 16:57:10 | VinUni_F2 | BKAgent_E3 | 4 | 4 | 3 | xác định được problem, đề xuất được giải pháp tiềm năng | tối ưu hơn hạ tầng, khả năng tải và thuật toán đề xuất ra thời khóa biểu tối ưu hơn | Cảm ơn góp ý của nhóm bạn. Trong phạm vi học phần, nhóm mình ưu tiên tính đúng của nghiệp vụ; phần tối ưu hạ tầng sẽ được đưa vào kế hoạch mở rộng sau demo. |
+| 09/04/2026 17:12:51 | VinUniE1 | VinUni E3 | 5 | 4 | 5 | Giải pháp hợp lý, nhu cầu sát thực tế | Xử lý khi dk-sis quá tải/sập | Cảm ơn nhóm bạn. Ở phiên bản hiện tại, tình huống quá tải/sập nằm ngoài phạm vi xử lý chính; nhóm đã làm rõ lại scope để tránh hiểu nhầm khi chấm. |
+| 09/04/2026 17:13:54 | VinUni_F1 | VinUni_E3 | 4 | 4 | 5 | Hệ thống có trích dẫn nguồn rõ ràng để giải thích cho lựa chọn của mình | Incorporate queue, async để tránh congestion | Cảm ơn góp ý rất thực tế. Nhóm đã ghi nhận và đưa hướng queue/async vào phần roadmap kỹ thuật cho các vòng tiếp theo. |
+| 09/04/2026 17:22:23 | VINUNI_F3 | BK_E3 | 3 | 3 | 4 | Demo khá tốt, cung cấp đúng đủ thông tin | Tối ưu hiệu suất trong trường hợp nhiều người dùng. | Cảm ơn nhóm bạn. Nhóm mình đã bổ sung cách tính độ tin cậy và các chỉ số để hỗ trợ quyết định khi tải hệ thống tăng. |
+| 09/04/2026 17:34:57 | VinUni_A1 | VinUni_E3 | 5 | 3 | 2 | Xác định được nhu cầu, failure rõ ràng, code kỹ thuật tối ưu | Vì đây là dự án đăng ký lịch học, nên cần kỹ thuật xử lý trùng lịch, thiết lập plan xử lý nếu trùng lặp khoảng thời gian. | Cảm ơn phản hồi của nhóm A1. Nhóm mình đã kiểm tra lại và hiện hệ thống đã có ràng buộc chống trùng lịch khi sinh plan; phần này cũng được đưa vào kịch bản demo để người chấm dễ xác thực. |

@@ -28,6 +28,9 @@ export function RegisterDialog() {
   const courses =
     store.selectedPlan === "B" ? store.planBCourses : store.planACourses;
   const status = store.registerStatus;
+  const closedCourses = courses.filter(
+    (c) => (c.slotsRemaining ?? ((c.capacity ?? 0) - (c.enrolled ?? 0))) <= 0
+  );
 
   useEffect(() => {
     if (!store.registerDialogOpen || status !== "loading") return;
@@ -44,6 +47,13 @@ export function RegisterDialog() {
   }, [store.registerDialogOpen, status]);
 
   function handleStart() {
+    if (closedCourses.length > 0) {
+      store.setToast({
+        title: "Không thể đăng ký",
+        message: `Có ${closedCourses.length} lớp đã hết chỗ trong plan hiện tại.`,
+      });
+      return;
+    }
     store.setRegisterStatus("loading");
   }
 
@@ -125,6 +135,16 @@ export function RegisterDialog() {
               </p>
             </div>
           )}
+          {status === "idle" && closedCourses.length > 0 && (
+            <div className="rounded-md border border-danger/25 bg-danger/5 p-2.5">
+              <p className="text-xs font-medium text-danger">
+                Plan hiện tại có lớp đã hết chỗ:
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                {closedCourses.map((c) => c.code).join(", ")}. Hãy đổi plan hoặc chỉnh sửa lịch trước khi đăng ký.
+              </p>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex gap-2">
@@ -133,7 +153,7 @@ export function RegisterDialog() {
                 size="sm"
                 className="flex-1 gap-1.5 text-xs"
                 onClick={handleStart}
-                disabled={courses.length === 0}
+                disabled={courses.length === 0 || closedCourses.length > 0}
               >
                 <Send className="size-3" />
                 Xác nhận đăng ký {courses.length} môn

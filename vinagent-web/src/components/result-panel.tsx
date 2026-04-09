@@ -223,7 +223,9 @@ export function ResultPanel() {
 
   const selectedCourses =
     store.selectedPlan === "B" ? store.planBCourses : store.planACourses;
-  const canRegister = store.selectedPlan !== null && selectedCourses.length > 0;
+  const hasClosedClass =
+    selectedCourses.some((c) => (c.slotsRemaining ?? ((c.capacity ?? 0) - (c.enrolled ?? 0))) <= 0);
+  const canRegister = store.selectedPlan !== null && selectedCourses.length > 0 && !hasClosedClass;
 
   return (
     <>
@@ -321,6 +323,11 @@ export function ResultPanel() {
           <Separator className="opacity-30" />
 
           <div className="flex flex-wrap gap-2 pb-4">
+            {hasClosedClass && (
+              <p className="w-full text-xs font-medium text-danger">
+                Có lớp đã hết chỗ trong plan đang chọn, vui lòng đổi plan hoặc chỉnh sửa trước khi đăng ký.
+              </p>
+            )}
             {canRegister && (
               <Button
                 size="sm"

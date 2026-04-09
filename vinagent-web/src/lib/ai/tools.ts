@@ -7,7 +7,6 @@ import studentData from "../mock/student.json";
 import curriculumData from "../mock/curriculum-cttt.json";
 
 type GenericRecord = Record<string, unknown>;
-type ScheduleEntry = GenericRecord;
 type NormalizedScheduleEntry = {
   classId: string;
   courseCode: string;
@@ -315,6 +314,16 @@ for (const c of searchableCourses) {
   codeAliasSignatures.set(c.code, [...aliases].filter(Boolean));
 }
 
+const MANUAL_ALIAS_TO_CODE: Record<string, string[]> = {
+  "giai tich ii": ["MI1124"],
+  "giai tich 2": ["MI1124"],
+  "vat ly ii": ["PH1120"],
+  "vat ly 2": ["PH1120"],
+  "vat ly dai cuong ii": ["PH1120"],
+  "physics ii": ["PH1120"],
+  "physics 2": ["PH1120"],
+};
+
 function resolveCourseCodes(inputs: string[]): {
   resolved: string[];
   unresolved: string[];
@@ -337,11 +346,15 @@ function resolveCourseCodes(inputs: string[]): {
     if (courseByCode.has(compactCode) || scheduleCourseCodeSet.has(compactCode)) {
       candidates = [compactCode];
     } else {
+      const manual = MANUAL_ALIAS_TO_CODE[normalizeLooseText(key)];
+      if (manual?.length) {
+        candidates = [...manual];
+      }
       const byAlias = new Set<string>();
       for (const v of aliasVariants(key)) {
         for (const c of aliasToCodes.get(v) ?? []) byAlias.add(c);
       }
-      candidates = [...byAlias];
+      candidates = [...new Set([...candidates, ...byAlias])];
       if (candidates.length === 0) {
         for (const course of searchableCourses) {
           if (
@@ -351,6 +364,26 @@ function resolveCourseCodes(inputs: string[]): {
           ) {
             candidates.push(course.code);
           }
+        }
+      }
+    }
+
+    if (candidates.length === 0) {
+      // Last fallback: semantic token matching (useful for short forms like "vat ly ii")
+      const normalizedQueryTokens = aliasVariants(key)
+        .flatMap((v) => v.split(" "))
+        .filter((t) => t && !STOP_TOKENS.has(t));
+      const uniqueQueryTokens = [...new Set(normalizedQueryTokens)];
+      if (uniqueQueryTokens.length > 0) {
+        const semantic = searchableCourses
+          .filter((course) => {
+            const aliases = codeAliasSignatures.get(course.code) ?? [];
+            const joined = aliases.join(" ");
+            return uniqueQueryTokens.every((t) => joined.includes(t));
+          })
+          .map((c) => c.code);
+        if (semantic.length > 0) {
+          candidates = semantic;
         }
       }
     }
@@ -654,6 +687,8 @@ export const generateScheduleTool = tool(
     const sectionsByCourse: Record<string, NormalizedScheduleEntry[]> = {};
     for (const code of resolvedTargets) {
       let sections = normalizedSchedule.filter((s) => s.courseCode === code);
+      // Do not allow closed classes in generated plans.
+      sections = sections.filter((s) => (s.slotsRemaining ?? (s.capacity - s.enrolled)) > 0);
       if (avoid_morning) sections = sections.filter((s) => s.startHour >= 9.5);
       if (avoid_afternoon) sections = sections.filter((s) => s.startHour < 14);
       sectionsByCourse[code] = sections;

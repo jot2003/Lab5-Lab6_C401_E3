@@ -7,6 +7,40 @@ export type ChatRequestBody = {
   aiConfig?: { provider: "gemini" | "chatgpt"; apiKey?: string };
 };
 
+function normalizeText(input: string) {
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function detectRequiredCourseCodes(message: string): string[] {
+  const msg = normalizeText(message);
+  const matched = new Set<string>();
+  const rules: Array<{ code: string; patterns: RegExp[] }> = [
+    {
+      code: "MI1124",
+      patterns: [/giai\s*tich\s*(ii|2)\b/, /\bmi1124\b/i],
+    },
+    {
+      code: "PH1120",
+      patterns: [/vat\s*ly\s*(ii|2)\b/, /\bph1120\b/i],
+    },
+  ];
+  for (const rule of rules) {
+    if (rule.patterns.some((p) => p.test(msg))) {
+      matched.add(rule.code);
+    }
+  }
+  return [...matched];
+}
+
+function enrichMessageWithRequiredCourses(message: string) {
+  const requiredCodes = detectRequiredCourseCodes(message);
+  if (requiredCodes.length === 0) return message;
+  return `${message}\n\n[RÀNG BUỘC HỆ THỐNG: Đây là các môn BẮT BUỘC trong kết quả và không được bỏ sót: ${requiredCodes.join(", ")}. Nếu có mã tương đương đang mở lớp thì vẫn phải đảm bảo đúng 2 môn tương ứng.]`;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as ChatRequestBody;
@@ -20,11 +54,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
+    const enrichedMessage = enrichMessageWithRequiredCourses(body.message);
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const event of streamAgent(body.message, body.history || [], aiConfig)) {
+          for await (const event of streamAgent(enrichedMessage, body.history || [], aiConfig)) {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
           }
         } catch (err) {

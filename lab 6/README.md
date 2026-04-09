@@ -372,3 +372,4 @@ Nguồn tham chiếu nội bộ:
 - `lab 6/02-templates/BKAgent-filled-submission.md`
 - `lab 6/03-tools-guide/BKAgent-tools-guide.md`
 - `lab 6/04-reference/BKAgent-reference.md`
+- `lab 6/feedback.md` (bản Markdown từ feedback.csv để tiện đọc/chấm)
