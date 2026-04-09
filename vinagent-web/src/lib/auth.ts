@@ -9,7 +9,35 @@ type StoredAccount = {
   createdAt: string;
 };
 
-export type StudentProfile = typeof studentData;
+export type StudentProfile = {
+  id: string;
+  name: string;
+  major: string;
+  year: number;
+  gpa: number;
+  currentSemester: string;
+  completedCourses: string[];
+  inProgressCourses: string[];
+  targetCourses: string[];
+  preferences: {
+    avoidMorning: boolean;
+    avoidAfternoon: boolean;
+    preferGroupFriends: boolean;
+    priorityDays: string[];
+    maxCreditsPerSemester: number;
+  };
+  groupFriends: Array<{ id: string; name: string }>;
+  advisorId: string;
+  advisorName: string;
+};
+
+type StudentDataset = StudentProfile & {
+  currentStudentId: string;
+  students: StudentProfile[];
+};
+
+const studentDataset = studentData as StudentDataset;
+const allStudents: StudentProfile[] = studentDataset.students || [];
 
 export type AuthResult = {
   ok: boolean;
@@ -45,7 +73,7 @@ function writeAccounts(accounts: StoredAccount[]) {
 }
 
 export function getStudentById(studentId: string): StudentProfile | null {
-  return studentData.id === studentId ? studentData : null;
+  return allStudents.find((student) => student.id === studentId) || null;
 }
 
 export function registerAccount(studentId: string, password: string): AuthResult {
@@ -125,7 +153,8 @@ export function verifyCurrentStudent(): AuthResult {
     return { ok: false, message: "Chưa có phiên đăng nhập hợp lệ." };
   }
 
-  const valid = student.id === studentData.id && student.name === studentData.name;
+  const source = getStudentById(student.id);
+  const valid = Boolean(source && source.name === student.name);
   if (!valid) {
     return { ok: false, message: "Thông tin người dùng không khớp dữ liệu gốc." };
   }

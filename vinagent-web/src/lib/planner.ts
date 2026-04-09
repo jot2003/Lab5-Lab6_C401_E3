@@ -26,6 +26,13 @@ export type PlannerDecision = {
   citations: Citation[];
 };
 
+function getCurrentStudent() {
+  return (
+    studentData.students.find((s) => s.id === studentData.currentStudentId) ||
+    studentData.students[0]
+  );
+}
+
 // Môn học trong Plan A — ánh xạ để check seat risk từ schedule.json
 const PLAN_A_COURSE_IDS = ["IT3010E", "IT3020E", "IT3100E", "IT3080"];
 
@@ -58,7 +65,7 @@ function checkPrerequisites(targetCourses: string[]): {
   ok: boolean;
   missing: { course: string; missing: string[] }[];
 } {
-  const completedCourses = studentData.completedCourses;
+  const completedCourses = getCurrentStudent().completedCourses;
   const prereqs = prerequisitesData as Record<string, { required: string[]; recommended: string[]; note: string }>;
   const missing: { course: string; missing: string[] }[] = [];
 
@@ -210,7 +217,7 @@ export function evaluatePlannerDecision(prompt: string): PlannerDecision {
   const happyCid2 = addCitation(
     "prerequisite",
     "Kiểm tra điều kiện tiên quyết — VinUni SIS",
-    `Sinh viên đã hoàn thành: ${studentData.completedCourses.join(", ")}. Tất cả điều kiện tiên quyết cho HK 20252 đều đáp ứng.`
+    `Sinh viên đã hoàn thành: ${getCurrentStudent().completedCourses.join(", ")}. Tất cả điều kiện tiên quyết cho HK 20252 đều đáp ứng.`
   );
   const communityCid = addCitation(
     "community",

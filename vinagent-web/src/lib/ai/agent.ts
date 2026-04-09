@@ -1,4 +1,5 @@
 import { ChatGoogle } from "@langchain/google";
+import { ChatOpenAI } from "@langchain/openai";
 import {
   StateGraph,
   MessagesAnnotation,
@@ -97,14 +98,37 @@ function shouldContinue(
 }
 
 function buildGraph() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
+  const provider = (process.env.LLM_PROVIDER || "auto").toLowerCase();
+  const modelName = process.env.DEFAULT_MODEL || "gpt-4o-mini";
+  const openAIKey = process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
+  const useOpenAI =
+    provider === "openai" ||
+    (provider === "auto" && (Boolean(process.env.OPENAI_API_KEY) || modelName.startsWith("gpt-")));
 
-  const model = new ChatGoogle({
-    apiKey,
-    model: process.env.DEFAULT_MODEL || "gemini-2.5-flash",
-    temperature: 0,
-  }).bindTools(allTools);
+  const chatModel = useOpenAI
+    ? (() => {
+        if (!openAIKey) {
+          throw new Error("OPENAI_API_KEY not configured");
+        }
+        return new ChatOpenAI({
+          apiKey: openAIKey,
+          model: modelName,
+          temperature: 0,
+        });
+      })()
+    : (() => {
+        const geminiKey = process.env.GEMINI_API_KEY;
+        if (!geminiKey) {
+          throw new Error("GEMINI_API_KEY not configured");
+        }
+        return new ChatGoogle({
+          apiKey: geminiKey,
+          model: process.env.DEFAULT_MODEL || "gemini-2.5-flash",
+          temperature: 0,
+        });
+      })();
+
+  const model = chatModel.bindTools(allTools);
 
   const toolNode = new ToolNode(allTools);
 

@@ -6,17 +6,25 @@ import prerequisitesData from "../mock/prerequisites.json";
 import studentData from "../mock/student.json";
 
 type ScheduleEntry = (typeof scheduleData)[number];
+type Student = (typeof studentData)["students"][number];
+
+function getCurrentStudent(): Student {
+  const selected = studentData.students.find((s) => s.id === studentData.currentStudentId);
+  if (selected) return selected;
+  return studentData.students[0];
+}
 
 // ── Tool 1: Get Student Profile ──
 
 export const getStudentProfileTool = tool(
   async () => {
+    const student = getCurrentStudent();
     return JSON.stringify({
-      ...studentData,
+      ...student,
       _citation: {
         type: "sis",
         title: "Hồ sơ sinh viên — VinUni SIS",
-        detail: `${studentData.name} (${studentData.id}), ${studentData.major} năm ${studentData.year}, GPA ${studentData.gpa}. Đã hoàn thành: ${studentData.completedCourses.join(", ")}.`,
+        detail: `${student.name} (${student.id}), ${student.major} năm ${student.year}, GPA ${student.gpa}. Đã hoàn thành: ${student.completedCourses.join(", ")}.`,
       },
     });
   },
@@ -118,11 +126,12 @@ export const checkScheduleTool = tool(
 
 export const checkPrerequisitesTool = tool(
   async ({ course_codes }: { course_codes: string[] }) => {
+    const student = getCurrentStudent();
     const prereqs = prerequisitesData as Record<
       string,
       { required: string[]; recommended: string[]; note: string }
     >;
-    const completed = studentData.completedCourses;
+    const completed = student.completedCourses;
 
     const results = course_codes.map((code) => {
       const req = prereqs[code];

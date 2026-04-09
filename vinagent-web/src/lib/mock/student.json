@@ -1,32 +1,127 @@
 {
-  "id": "2A202600205",
-  "name": "Nguyễn Thanh Nam",
-  "major": "Computer Science",
-  "year": 3,
-  "gpa": 3.25,
-  "currentSemester": "20252",
-  "completedCourses": [
-    "IT1110",
-    "IT2000",
-    "IT2030",
-    "IT3010E",
-    "IT3090E"
-  ],
-  "inProgressCourses": [],
-  "targetCourses": ["IT3020E", "IT3100E", "IT3080", "IT3160E"],
-  "preferences": {
-    "avoidMorning": false,
-    "avoidAfternoon": false,
-    "preferGroupFriends": false,
-    "priorityDays": ["Mon", "Tue", "Wed", "Thu"],
-    "maxCreditsPerSemester": 18
-  },
-  "groupFriends": [
-    { "id": "2A202600372", "name": "Hoàng Kim Trí Thành" },
-    { "id": "2A202600019", "name": "Đặng Đinh Tú Anh" },
-    { "id": "2A202600423", "name": "Quách Gia Được" },
-    { "id": "2A202600490", "name": "Phạm Quốc Dũng" }
-  ],
-  "advisorId": "advisor-001",
-  "advisorName": "TS. Nguyễn Văn An"
+  "currentStudentId": "2A202600205",
+  "students": [
+    {
+      "id": "2A202600205",
+      "name": "Nguyễn Thanh Nam",
+      "major": "Computer Science",
+      "year": 3,
+      "gpa": 3.25,
+      "currentSemester": "20252",
+      "completedCourses": ["IT1110", "IT2000", "IT2030", "IT3010E", "IT3090E"],
+      "inProgressCourses": [],
+      "targetCourses": ["IT3020E", "IT3100E", "IT3080", "IT3160E"],
+      "preferences": {
+        "avoidMorning": false,
+        "avoidAfternoon": false,
+        "preferGroupFriends": false,
+        "priorityDays": ["Mon", "Tue", "Wed", "Thu"],
+        "maxCreditsPerSemester": 18
+      },
+      "groupFriends": [
+        { "id": "2A202600372", "name": "Hoàng Kim Trí Thành" },
+        { "id": "2A202600019", "name": "Đặng Đinh Tú Anh" },
+        { "id": "2A202600423", "name": "Quách Gia Được" },
+        { "id": "2A202600490", "name": "Phạm Quốc Dũng" }
+      ],
+      "advisorId": "advisor-001",
+      "advisorName": "TS. Nguyễn Văn An"
+    },
+    {
+      "id": "2A202600372",
+      "name": "Hoàng Kim Trí Thành",
+      "major": "Computer Science",
+      "year": 3,
+      "gpa": 3.42,
+      "currentSemester": "20252",
+      "completedCourses": ["IT1110", "IT2000", "IT2030", "IT3010E"],
+      "inProgressCourses": ["IT3150E"],
+      "targetCourses": ["IT3100E", "IT3080", "IT3160E"],
+      "preferences": {
+        "avoidMorning": true,
+        "avoidAfternoon": false,
+        "preferGroupFriends": true,
+        "priorityDays": ["Tue", "Thu", "Fri"],
+        "maxCreditsPerSemester": 16
+      },
+      "groupFriends": [
+        { "id": "2A202600205", "name": "Nguyễn Thanh Nam" },
+        { "id": "2A202600019", "name": "Đặng Đinh Tú Anh" }
+      ],
+      "advisorId": "advisor-001",
+      "advisorName": "TS. Nguyễn Văn An"
+    },
+    {
+      "id": "2A202600019",
+      "name": "Đặng Đinh Tú Anh",
+      "major": "Data Science",
+      "year": 2,
+      "gpa": 3.58,
+      "currentSemester": "20252",
+      "completedCourses": ["IT1110", "IT2000", "MATH1001", "STAT2001"],
+      "inProgressCourses": ["IT2030"],
+      "targetCourses": ["IT3020E", "IT3150E", "IT3160E"],
+      "preferences": {
+        "avoidMorning": false,
+        "avoidAfternoon": true,
+        "preferGroupFriends": false,
+        "priorityDays": ["Mon", "Wed", "Thu"],
+        "maxCreditsPerSemester": 18
+      },
+      "groupFriends": [
+        { "id": "2A202600205", "name": "Nguyễn Thanh Nam" },
+        { "id": "2A202600423", "name": "Quách Gia Được" }
+      ],
+      "advisorId": "advisor-002",
+      "advisorName": "TS. Trần Minh Hòa"
+    },
+    {
+      "id": "2A202600423",
+      "name": "Quách Gia Được",
+      "major": "Computer Science",
+      "year": 3,
+      "gpa": 3.05,
+      "currentSemester": "20252",
+      "completedCourses": ["IT1110", "IT2000", "IT2030"],
+      "inProgressCourses": [],
+      "targetCourses": ["IT3010E", "IT3020E", "IT3100E"],
+      "preferences": {
+        "avoidMorning": false,
+        "avoidAfternoon": false,
+        "preferGroupFriends": true,
+        "priorityDays": ["Mon", "Tue", "Thu"],
+        "maxCreditsPerSemester": 15
+      },
+      "groupFriends": [
+        { "id": "2A202600490", "name": "Phạm Quốc Dũng" },
+        { "id": "2A202600205", "name": "Nguyễn Thanh Nam" }
+      ],
+      "advisorId": "advisor-003",
+      "advisorName": "TS. Lê Hoàng Anh"
+    },
+    {
+      "id": "2A202600490",
+      "name": "Phạm Quốc Dũng",
+      "major": "Software Engineering",
+      "year": 2,
+      "gpa": 3.31,
+      "currentSemester": "20252",
+      "completedCourses": ["IT1110", "IT2000", "IT2030", "IT2040"],
+      "inProgressCourses": ["IT2090"],
+      "targetCourses": ["IT3080", "IT3150E", "IT3160E"],
+      "preferences": {
+        "avoidMorning": true,
+        "avoidAfternoon": false,
+        "preferGroupFriends": true,
+        "priorityDays": ["Tue", "Wed", "Fri"],
+        "maxCreditsPerSemester": 17
+      },
+      "groupFriends": [
+        { "id": "2A202600423", "name": "Quách Gia Được" },
+        { "id": "2A202600372", "name": "Hoàng Kim Trí Thành" }
+      ],
+      "advisorId": "advisor-003",
+      "advisorName": "TS. Lê Hoàng Anh"
+    }
+  ]
 }
