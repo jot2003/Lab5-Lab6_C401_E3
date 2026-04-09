@@ -1,7 +1,6 @@
 # Tổng hợp feedback cho nhóm E3
 
-Nguồn gốc: chuyển đổi nguyên văn từ `lab 6/feedback.csv` sang Markdown để dễ đọc.  
-Lưu ý: nội dung các cột đánh giá được giữ nguyên; chỉ chỉnh lại cột phản hồi của nhóm E3 theo văn phong lịch sự, chuyên nghiệp.
+Lưu ý: nội dung các cột đánh giá được giữ nguyên; ngoài ra nhóm E3 cũng phản hồi tại cột cuối cùng để thầy cô và các nhóm theo dõi.
 
 | Dấu thời gian | Nhóm đánh giá | Nhóm được đánh giá | Problem-solution fit | AI product thinking | Demo quality | 1 điều team đã làm tốt | Gợi ý cải thiện | Phản hồi của nhóm E3 (đã biên tập) |
 |---|---|---|---:|---:|---:|---|---|---|

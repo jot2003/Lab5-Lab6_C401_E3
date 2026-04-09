@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Home, CalendarPlus, BarChart3, Plus, MessageSquare, Trash2, History, UserCircle, LogOut, Bell } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { getCurrentStudent, logoutAccount } from "@/lib/auth";
 import type { StudentProfile } from "@/lib/student-data";
 import { getPendingInvitesFor } from "@/lib/group-registration";
@@ -34,8 +34,25 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [historyOpen, setHistoryOpen] = useState(true);
-  const [currentUser, setCurrentUser] = useState<StudentProfile | null>(null);
-  const [, forceTick] = useState(0);
+  const currentUser = useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") return () => {};
+      const rerender = () => onStoreChange();
+      const onStorage = (e: StorageEvent) => {
+        if (!e.key || e.key === "bkagent.groupInvites" || e.key === "bkagent.currentUser") {
+          rerender();
+        }
+      };
+      window.addEventListener("storage", onStorage);
+      window.addEventListener("bkagent:invites-changed", rerender);
+      return () => {
+        window.removeEventListener("storage", onStorage);
+        window.removeEventListener("bkagent:invites-changed", rerender);
+      };
+    },
+    () => getCurrentStudent(),
+    () => null
+  ) as StudentProfile | null;
   const pendingInviteCount = currentUser ? getPendingInvitesFor(currentUser.id).length : 0;
   const { sessions, currentSessionId, newSession, loadSession, deleteSession, stopGenerating } = useBKAgent();
   const ownerId = currentUser?.id ?? "anonymous";
@@ -44,14 +61,6 @@ export function AppSidebar() {
   useEffect(() => {
     stopGenerating();
   }, [pathname, stopGenerating]);
-
-  useEffect(() => {
-    setCurrentUser(getCurrentStudent());
-  }, []);
-
-  useEffect(() => {
-    setCurrentUser(getCurrentStudent());
-  }, [pathname]);
 
   useEffect(() => {
     // Keep runtime context isolated per logged-in user
@@ -85,24 +94,6 @@ export function AppSidebar() {
       };
     });
   }, [pathname]); // re-check on navigation (login/logout)
-
-  useEffect(() => {
-    const rerender = () => {
-      setCurrentUser(getCurrentStudent());
-      forceTick((n) => n + 1);
-    };
-    const onStorage = (e: StorageEvent) => {
-      if (!e.key || e.key === "bkagent.groupInvites" || e.key === "bkagent.currentUser") {
-        rerender();
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("bkagent:invites-changed", rerender);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("bkagent:invites-changed", rerender);
-    };
-  }, []);
 
   function handleNewChat() {
     stopGenerating();
