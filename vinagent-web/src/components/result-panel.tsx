@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, Pencil, UserRound, ChevronDown, ChevronUp, Users, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Pencil, UserRound, ChevronDown, ChevronUp, Users, CheckCircle2, CircleHelp } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useBKAgent } from "@/lib/store";
@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AdvisorBriefSheet } from "./advisor-brief-sheet";
 import { EditPlanSheet } from "./edit-plan-sheet";
 import { RegisterDialog } from "./register-dialog";
@@ -71,7 +72,24 @@ function ConfidenceBar({
     <div className="rounded-lg bg-primary text-white shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3">
         <div>
-          <span className="text-sm font-bold text-white">Độ tin cậy từng plan</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-sm font-bold text-white/95 hover:text-white transition-colors"
+                  >
+                    Độ tin cậy từng plan
+                    <CircleHelp className="size-3.5 opacity-80" />
+                  </button>
+                }
+              />
+              <TooltipContent className="max-w-sm border border-white/20 bg-white text-primary px-3 py-2 leading-relaxed">
+                Điểm plan = 60% dựa vào số chỗ trống của lớp + 25% dựa vào việc lịch có bị dồn trong 1 ngày hay không + 15% dựa vào việc môn học có được trải đều trong tuần. Kết quả cuối cùng luôn nằm trong khoảng 35-99.
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <p className="text-xs text-white/80 mt-0.5">
             60%: lớp còn nhiều chỗ • 25%: lịch trong tuần đỡ dồn • 15%: môn được chia đều giữa các ngày.
           </p>
