@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarPlus, BarChart3 } from "lucide-react";
+import { Home, CalendarPlus, BarChart3, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 import {
   Sidebar,
@@ -14,6 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Switch } from "@/components/ui/switch";
 
 const NAV_ITEMS = [
   { href: "/", label: "Trang chủ", icon: Home },
@@ -23,6 +26,12 @@ const NAV_ITEMS = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -61,6 +70,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <div className="border-t border-sidebar-border p-3">
+        {mounted && (
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">Dark</span>
+            <Switch
+              checked={theme === "dark"}
+              onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+            />
+          </div>
+        )}
+      </div>
     </Sidebar>
   );
 }
