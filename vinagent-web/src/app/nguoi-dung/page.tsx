@@ -4,14 +4,25 @@ import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, LogOut, User, BookOpen, Star, Calendar, GraduationCap, ChevronRight } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, LogOut, User, BookOpen, Star, Calendar, GraduationCap, ChevronRight } from "lucide-react";
 import { getCurrentStudent, logoutAccount, verifyCurrentStudent } from "@/lib/auth";
 import { getPendingInvitesFor, markInviteStatus, setInviteAction, type GroupInvite } from "@/lib/group-registration";
+import { useBKAgent } from "@/lib/store";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 export default function UserProfilePage() {
   const router = useRouter();
   const [verification, setVerification] = useState<{ ok: boolean; message: string } | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const aiProvider = useBKAgent((state) => state.aiProvider);
+  const apiKey = useBKAgent((state) => state.apiKey);
+  const setAIProvider = useBKAgent((state) => state.setAIProvider);
+  const setApiKey = useBKAgent((state) => state.setApiKey);
+  const stopGenerating = useBKAgent((state) => state.stopGenerating);
+  const providerLabel = aiProvider === "chatgpt" ? "ChatGPT" : "Gemini";
 
   const student = useSyncExternalStore(
     () => () => {},
@@ -24,6 +35,7 @@ export default function UserProfilePage() {
   }
 
   function onLogout() {
+    stopGenerating();
     logoutAccount();
     router.push("/dang-nhap");
   }
@@ -43,7 +55,6 @@ export default function UserProfilePage() {
     () => (student ? getPendingInvitesFor(student.id) : []),
     () => [] as GroupInvite[]
   );
-
   if (!student) {
     return (
       <div className="flex h-full overflow-y-auto items-center justify-center bg-background px-6">
@@ -176,6 +187,48 @@ export default function UserProfilePage() {
         <div className="mt-3 rounded-2xl border border-border bg-card shadow-sm px-5 py-4">
           <p className="text-xs text-muted-foreground mb-1">Cố vấn học vụ</p>
           <p className="text-sm font-medium text-foreground">{student.advisorName}</p>
+        </div>
+
+        <div className="mt-3 rounded-2xl border border-border bg-card shadow-sm px-5 py-4">
+          <p className="text-xs text-muted-foreground mb-3">Cấu hình AI</p>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Nhà cung cấp API</Label>
+              <Select value={aiProvider} onValueChange={(value) => setAIProvider(value as "gemini" | "chatgpt")}>
+                <SelectTrigger className="w-full h-9 text-xs">
+                  {providerLabel}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="chatgpt" className="text-xs">ChatGPT</SelectItem>
+                  <SelectItem value="gemini" className="text-xs">Gemini</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">API key</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type={showApiKey ? "text" : "password"}
+                  value={apiKey}
+                  onChange={(event) => setApiKey(event.target.value)}
+                  placeholder={aiProvider === "chatgpt" ? "sk-..." : "AIza..."}
+                  className="h-9 text-xs"
+                  autoComplete="off"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  className="shrink-0"
+                  onClick={() => setShowApiKey((value) => !value)}
+                  aria-label={showApiKey ? "Ẩn API key" : "Hiện API key"}
+                >
+                  {showApiKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Actions */}
