@@ -33,6 +33,11 @@ export default function UserProfilePage() {
     router.push("/dang-nhap");
   }
 
+  useEffect(() => {
+    if (!student) return;
+    refreshInvites(student.id);
+  }, [student?.id]);
+
   if (!student) {
     return (
       <div className="flex h-full overflow-y-auto items-center justify-center bg-background px-6">
@@ -55,10 +60,6 @@ export default function UserProfilePage() {
       </div>
     );
   }
-
-  useEffect(() => {
-    refreshInvites(student.id);
-  }, [student.id]);
 
   const infoRows = [
     { icon: User, label: "Mã sinh viên", value: student.id },

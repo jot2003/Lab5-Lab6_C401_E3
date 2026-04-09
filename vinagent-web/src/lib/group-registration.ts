@@ -4,6 +4,7 @@ import type { CourseSlot } from "./store";
 
 const INVITE_KEY = "bkagent.groupInvites";
 const INVITE_ACTION_KEY = "bkagent.inviteAction";
+const INVITE_CHANGED_EVENT = "bkagent:invites-changed";
 
 export type GroupInvite = {
   id: string;
@@ -32,6 +33,7 @@ function readInvites(): GroupInvite[] {
 function writeInvites(invites: GroupInvite[]) {
   if (typeof window === "undefined") return;
   localStorage.setItem(INVITE_KEY, JSON.stringify(invites));
+  window.dispatchEvent(new Event(INVITE_CHANGED_EVENT));
 }
 
 export function createGroupInvites(params: {

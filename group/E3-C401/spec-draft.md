@@ -36,7 +36,7 @@ Phiên bản v2.0 tập trung 7 cải tiến chính:
 |   | Value | Trust | Feasibility |
 |---|-------|-------|-------------|
 | **Câu hỏi guide** | User nào? Pain gì? AI giải quyết gì mà cách hiện tại không giải được? | Khi AI sai thì user bị ảnh hưởng thế nào? User biết AI sai bằng cách nào? User sửa bằng cách nào? | Cost bao nhiêu/request? Latency bao lâu? Risk chính là gì? |
-| **Trả lời** | **User:** Sinh viên HUST (đặc biệt năm 1-2), chuyên viên phòng đào tạo. **Pain:** Hệ thống dk-sis quá tải khi mở đăng ký, sập liên tục; các môn đại cương (Quân sự, Thể chất, Triết học Mác-Lênin) hết chỗ trong vài phút; phải kết hợp lớp lý thuyết + bài tập + thí nghiệm (Vật lý, Hóa học) rất phức tạp; mã môn thay đổi theo khóa gây nhầm lẫn. Mất 3-5 giờ/kỳ để đăng ký thành công. **AI giải quyết:** Chat tự nhiên → Agent phân tích điều kiện, tạo kế hoạch tối ưu với Plan A + Plan B, hỗ trợ đăng ký nhanh trong đợt điều chỉnh. | **Ưu tiên:** Precision cao hơn Recall vì đăng ký nhầm môn gây hậu quả trực tiếp (mất học phí, lệch tiến độ). **Khi sai:** Sinh viên đăng ký lỗi, mất slot đợt chính, phải chờ đợt điều chỉnh. **Biết sai:** Thất bại khi submit trên dk-sis, mismatch với SIS, hoặc kế hoạch không phù hợp preference. **Sửa:** Editable Plan, xác nhận bắt buộc trước action quan trọng, nút escalate sang cố vấn + Advisor Brief tự động. | **Cost ước tính:** Gemini 2.5 Flash ~0.0001 USD/query, thêm chi phí hạ tầng Next.js + logging. **Latency mục tiêu:** <3 giây cho đề xuất lịch. **Risk chính:** dk-sis không có API công khai (chỉ crawl được), dữ liệu slot thay đổi liên tục trong giờ cao điểm, hallucination mã môn/prereq, stale cache khi hệ thống quá tải. |
+| **Trả lời** | **User:** Sinh viên HUST (đặc biệt năm 1-2), chuyên viên phòng đào tạo. **Pain:** Các môn đại cương (Quân sự, Thể chất, Triết học Mác-Lênin) hết chỗ rất nhanh; phải kết hợp lớp lý thuyết + bài tập + thí nghiệm (Vật lý, Hóa học) rất phức tạp; mã môn thay đổi theo khóa gây nhầm lẫn; sinh viên mất nhiều thời gian thử-sai để ghép lịch khả thi. **AI giải quyết:** Chat tự nhiên → Agent phân tích điều kiện, tạo kế hoạch tối ưu với Plan A + Plan B, giảm lỗi chọn môn/trùng lịch và tăng khả năng chốt kế hoạch sớm. | **Ưu tiên:** Precision cao hơn Recall vì đăng ký nhầm môn gây hậu quả trực tiếp (mất học phí, lệch tiến độ). **Khi sai:** Sinh viên đăng ký lỗi, mất slot đợt chính, phải chờ đợt điều chỉnh. **Biết sai:** Mismatch với SIS, hoặc kế hoạch không phù hợp preference/ràng buộc cá nhân. **Sửa:** Editable Plan, xác nhận bắt buộc trước action quan trọng, nút escalate sang cố vấn + Advisor Brief tự động. | **Cost ước tính:** Gemini 2.5 Flash ~0.0001 USD/query, thêm chi phí hạ tầng Next.js + logging. **Latency mục tiêu:** <3 giây cho đề xuất lịch. **Risk chính:** dữ liệu slot thay đổi liên tục theo thời gian, hallucination mã môn/prereq, thiếu dữ liệu lớp cho một số môn, stale cache dữ liệu lịch. |
 
 ---
 
@@ -83,9 +83,9 @@ Có. Dữ liệu hành vi đăng ký môn theo ngành tại HUST là dữ liệu
 - Outcome: Giảm overconfidence.
 
 ### Path 4 — Failure
-- Trigger: Submit thất bại do dk-sis quá tải hoặc hết slot.
+- Trigger: Plan hiện tại không khả thi (xung đột lịch, thiếu tiên quyết, hoặc môn gần hết chỗ).
 - AI action: Tự phát hiện lỗi, chuyển sang phương án khả thi nhất tiếp theo.
-- UI: Error reason rõ + nút "Dùng Plan B" + gợi ý đợt điều chỉnh.
+- UI: Error reason rõ + nút "Dùng Plan B" + gợi ý phương án thay thế.
 - Outcome: Graceful failure.
 
 ### Path 5 — Trust Recovery
@@ -96,9 +96,9 @@ Có. Dữ liệu hành vi đăng ký môn theo ngành tại HUST là dữ liệu
 
 ### Path 6 — Đăng ký đồng bộ (Sync Registration)
 - Trigger: Sinh viên xác nhận Plan A hoặc B (confidence ≥ 80).
-- AI action: Chuẩn bị danh sách môn + slot tối ưu, xác nhận lần cuối trước khi gửi.
-- UI: Dialog xác nhận → progress animation từng môn → tổng kết "Đã đăng ký X/Y môn".
-- Outcome: Tiết kiệm 30–60 phút thao tác thủ công trên dk-sis; giảm sai sót nhập tay.
+- AI action: Chuẩn bị danh sách môn + slot tối ưu, xác nhận lần cuối trước khi sinh viên thực hiện đăng ký.
+- UI: Dialog xác nhận → progress animation từng môn → tổng kết "Đã sẵn sàng đăng ký X/Y môn".
+- Outcome: Giảm sai sót nhập tay và rút ngắn thời gian chuẩn bị trước khi vào cổng đăng ký.
 
 ### Path 7 — Đăng ký nhóm (Group Registration)
 - Trigger: Sinh viên muốn học cùng nhóm bạn (preferGroupFriends = true).
@@ -115,7 +115,7 @@ Có. Dữ liệu hành vi đăng ký môn theo ngành tại HUST là dữ liệu
 3. **Advisor Brief:** tự tóm tắt bối cảnh cho cố vấn khi escalate.
 4. **Demand Forecasting:** dự báo nhu cầu mở lớp từ draft sessions, hỗ trợ phòng đào tạo lên kế hoạch.
 5. **Hesitation Signals:** học từ hành vi do dự, không chỉ từ like/dislike.
-6. **Sync Registration:** sau khi xác nhận plan, BKAgent chuẩn bị và gửi lệnh đăng ký thay mặt sinh viên, giảm sai sót thao tác thủ công trên dk-sis.
+6. **Sync Registration:** sau khi xác nhận plan, BKAgent chuẩn bị danh sách đăng ký chuẩn hóa để sinh viên thao tác nhanh và chính xác hơn.
 7. **Group Registration:** sinh viên có thể mời bạn đăng ký cùng; hệ thống tự tìm slot chung tối ưu cho cả nhóm.
 
 ---
@@ -137,24 +137,24 @@ Có. Dữ liệu hành vi đăng ký môn theo ngành tại HUST là dữ liệu
 | Failure mode | Trigger | Hậu quả | Mitigation |
 |---|---|---|---|
 | Prerequisite Hallucination | LLM tự suy diễn prereq | Đăng ký sai, bị hủy môn | Bắt buộc tool call get_prerequisites + validator độc lập |
-| Stale Schedule Data | Cache cũ giờ cao điểm (dk-sis quá tải) | Plan fail khi submit | TTL 2 phút + timestamp + Plan B |
+| Stale Schedule Data | Cache dữ liệu lịch/chỗ ngồi không còn mới | Plan fail khi áp dụng thực tế | TTL 2 phút + timestamp + Plan B |
 | Ambiguous Intent Overconfidence | Confidence chưa đủ nhưng auto-run | Sai nguyện vọng | Threshold auto-action = 80%, confirm bắt buộc |
 | LT-BT-TN Mismatch | Không ghép đúng lớp lý thuyết + bài tập + thí nghiệm | Lịch xung đột, thiếu thành phần | Ràng buộc cứng trong CSP: cùng nhóm LT-BT-TN |
 | Mã môn khóa cũ/mới | Sinh viên khóa cũ đăng ký mã môn khóa mới | Không tìm thấy môn | Mapping table mã môn theo khóa + cảnh báo |
-| dk-sis Timeout | Hệ thống quá tải khi gửi đăng ký hàng loạt | Đăng ký thất bại giờ cao điểm | Retry với exponential backoff + thông báo rõ ràng |
+| SIS Submission Failure | Kết quả thao tác đăng ký thực tế khác dự kiến plan | Không chốt được lịch theo plan đã chọn | Chuẩn bị Plan B + hướng dẫn thao tác thay thế rõ ràng |
 | Group Slot Conflict | Không tồn tại slot nào chung cho cả nhóm | Phải tách nhóm | Gợi ý slot gần nhau nhất + thông báo tới từng thành viên |
 
 ---
 
 ## 6) ROI — 3 kịch bản + Strategic ROI
 
-Giả định: ~35,000 sinh viên, 2 kỳ/năm, hiện mất ~4 giờ/sinh viên/kỳ (bao gồm thời gian chờ dk-sis).
+Giả định: ~35,000 sinh viên, 2 kỳ/năm, hiện mất ~4 giờ/sinh viên/kỳ cho việc lên phương án và chỉnh sửa kế hoạch đăng ký.
 
 | Kịch bản | Adoption/Chất lượng | Giờ tiết kiệm/năm | Tác động |
 |---|---|---|---|
 | Conservative | 10% SV, Precision ~70%, Edit cao | ~28,000 giờ | Giảm tải cơ bản; đủ dữ liệu cho pilot forecasting |
 | Realistic | 30% SV, Precision ~87%, Edit ~22% | ~75,600 giờ | ROI tốt; giảm workload phòng đào tạo; dashboard có giá trị vận hành |
-| Optimistic | 60% SV, Precision ~93%, Edit ~10% | ~151,200 giờ | Tạo lợi thế chiến lược: dự báo mở lớp sớm, giảm tải dk-sis |
+| Optimistic | 60% SV, Precision ~93%, Edit ~10% | ~151,200 giờ | Tạo lợi thế chiến lược: dự báo mở lớp sớm, tối ưu vận hành học vụ |
 
 **Learning Flywheel Effect:** Qua 2-3 kỳ, Edit Rate giảm dần nhờ cộng dồn dữ liệu hành vi và correction; ROI tăng theo thời gian mà không tăng chi phí tuyến tính.
 
@@ -162,7 +162,7 @@ Giả định: ~35,000 sinh viên, 2 kỳ/năm, hiện mất ~4 giờ/sinh viên
 
 ## 7) Mini AI Spec (1 trang cho giám khảo)
 
-- **Vấn đề:** Đăng ký tín chỉ tại HUST cực kỳ căng thẳng do dk-sis quá tải, môn đại cương hết chỗ nhanh, phải ghép lớp LT-BT-TN phức tạp.
+- **Vấn đề:** Đăng ký tín chỉ tại HUST căng thẳng vì môn đại cương hết chỗ nhanh, phải ghép lớp LT-BT-TN phức tạp, và sinh viên phải thử-sai nhiều lần để có lịch khả thi.
 - **Giải pháp:** BKAgent v2.0 dùng Agentic workflow để đề xuất, xác nhận và chuẩn bị kế hoạch đăng ký tối ưu với Plan A + Plan B.
 - **Stack:** Gemini 2.5 Flash + LangGraph StateGraph + Mock SIS data + CSP + Next.js.
 - **Tính năng nổi bật:** Đăng ký đồng bộ (sync registration từ giao diện), Đăng ký nhóm (group invite + tìm slot chung).

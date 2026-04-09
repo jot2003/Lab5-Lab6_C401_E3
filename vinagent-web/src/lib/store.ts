@@ -39,6 +39,7 @@ export type AgentStep = {
 
 export type ChatSession = {
   id: string;
+  ownerId: string;
   title: string;
   createdAt: Date;
   messages: ChatMessage[];
@@ -133,6 +134,11 @@ function toCourseSlots(
 
 function generateSessionId() {
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function getActiveUserId() {
+  if (typeof window === "undefined") return "anonymous";
+  return window.localStorage.getItem("bkagent.currentUser") ?? "anonymous";
 }
 
 const initialState = {
@@ -299,6 +305,7 @@ export const useBKAgent = create<BKAgentState>()(
                       "Phiên mới";
                     const session: ChatSession = {
                       id: sessionId,
+                      ownerId: getActiveUserId(),
                       title: sessionTitle,
                       createdAt: new Date(),
                       messages: updatedMessages,
@@ -491,6 +498,7 @@ export const useBKAgent = create<BKAgentState>()(
             s.messages.find((m) => m.role === "user")?.text.slice(0, 45) ?? "Phiên mới";
           const session: ChatSession = {
             id: sessionId,
+            ownerId: getActiveUserId(),
             title: sessionTitle,
             createdAt: new Date(),
             messages: s.messages,
@@ -513,7 +521,8 @@ export const useBKAgent = create<BKAgentState>()(
 
       loadSession: (id) => {
         const { sessions } = get();
-        const session = sessions.find((s) => s.id === id);
+        const activeUserId = getActiveUserId();
+        const session = sessions.find((s) => s.id === id && s.ownerId === activeUserId);
         if (!session) return;
         set({
           currentSessionId: session.id,
@@ -536,8 +545,9 @@ export const useBKAgent = create<BKAgentState>()(
       },
 
       deleteSession: (id) => {
+        const activeUserId = getActiveUserId();
         set((s) => ({
-          sessions: s.sessions.filter((ss) => ss.id !== id),
+          sessions: s.sessions.filter((ss) => !(ss.id === id && ss.ownerId === activeUserId)),
         }));
       },
     }),

@@ -3,10 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, CalendarPlus, BarChart3, Plus, MessageSquare, Trash2, History, UserCircle, LogOut } from "lucide-react";
+import { Home, CalendarPlus, BarChart3, Plus, MessageSquare, Trash2, History, UserCircle, LogOut, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getCurrentStudent, logoutAccount } from "@/lib/auth";
 import type { StudentProfile } from "@/lib/student-data";
+import { getPendingInvitesFor } from "@/lib/group-registration";
 
 import {
   Sidebar,
@@ -33,12 +34,60 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [historyOpen, setHistoryOpen] = useState(true);
-  const [currentUser, setCurrentUser] = useState<StudentProfile | null>(null);
+  const [, forceTick] = useState(0);
+  const currentUser: StudentProfile | null = getCurrentStudent();
+  const pendingInviteCount = currentUser ? getPendingInvitesFor(currentUser.id).length : 0;
   const { sessions, currentSessionId, newSession, loadSession, deleteSession } = useBKAgent();
+  const ownerId = currentUser?.id ?? "anonymous";
+  const userSessions = sessions.filter((s) => (s.ownerId ?? "anonymous") === ownerId);
 
   useEffect(() => {
-    setCurrentUser(getCurrentStudent());
+    // Keep runtime context isolated per logged-in user
+    useBKAgent.setState((s) => {
+      const activeOwner = getCurrentStudent()?.id ?? "anonymous";
+      const owned = s.sessions.filter((ss) => (ss.ownerId ?? "anonymous") === activeOwner);
+      const currentOwned = owned.find((ss) => ss.id === s.currentSessionId);
+      if (currentOwned) return {};
+      if (owned.length > 0) {
+        const first = owned[0];
+        return {
+          currentSessionId: first.id,
+          messages: first.messages,
+          planACourses: first.planACourses,
+          planBCourses: first.planBCourses,
+          citations: first.citations,
+          flow: "happy" as const,
+          isTyping: false,
+          streamingSteps: [],
+        };
+      }
+      return {
+        currentSessionId: `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        messages: [],
+        planACourses: [],
+        planBCourses: [],
+        citations: [],
+        flow: "idle" as const,
+        isTyping: false,
+        streamingSteps: [],
+      };
+    });
   }, [pathname]); // re-check on navigation (login/logout)
+
+  useEffect(() => {
+    const rerender = () => forceTick((n) => n + 1);
+    const onStorage = (e: StorageEvent) => {
+      if (!e.key || e.key === "bkagent.groupInvites" || e.key === "bkagent.currentUser") {
+        rerender();
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("bkagent:invites-changed", rerender);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("bkagent:invites-changed", rerender);
+    };
+  }, []);
 
   function handleNewChat() {
     newSession();
@@ -88,6 +137,11 @@ export function AppSidebar() {
                     >
                       <item.icon className="size-4" />
                       <span>{item.label}</span>
+                      {item.href === "/nguoi-dung" && pendingInviteCount > 0 && (
+                        <span className="ml-auto inline-flex min-w-4 h-4 items-center justify-center rounded-full bg-white text-primary text-[10px] font-bold px-1">
+                          {pendingInviteCount}
+                        </span>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -97,17 +151,17 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {/* Chat history section */}
-        {sessions.length > 0 && (
+        {userSessions.length > 0 && (
           <SidebarGroup className="group-data-[collapsible=icon]:hidden">
             <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
               <CollapsibleTrigger className="flex w-full items-center gap-1.5 px-2 py-1.5 text-xs font-semibold text-white/70 hover:text-white transition-colors">
                 <History className="size-3.5" />
                 <span>Lịch sử</span>
-                <span className="ml-auto text-white/50">{sessions.length}</span>
+                <span className="ml-auto text-white/50">{userSessions.length}</span>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <div className="mt-1 space-y-0.5 px-1">
-                  {sessions.slice(0, 8).map((session) => (
+                  {userSessions.slice(0, 8).map((session) => (
                     <div
                       key={session.id}
                       className={`group flex items-center gap-1.5 rounded-md px-2 py-1.5 cursor-pointer transition-colors ${
@@ -152,9 +206,15 @@ export function AppSidebar() {
                 <p className="text-[10px] text-white/60 leading-tight truncate">{currentUser.id} · {currentUser.major}</p>
               </div>
             </Link>
+            {pendingInviteCount > 0 && (
+              <Link href="/nguoi-dung" className="mt-1 flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-white/80 hover:bg-white/10">
+                <Bell className="size-3" />
+                <span>Bạn có {pendingInviteCount} lời mời mới</span>
+              </Link>
+            )}
             <button
               className="mt-1 flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-              onClick={() => { logoutAccount(); setCurrentUser(null); router.push("/dang-nhap"); }}
+              onClick={() => { logoutAccount(); router.push("/dang-nhap"); }}
             >
               <LogOut className="size-3" />
               <span>Đăng xuất</span>

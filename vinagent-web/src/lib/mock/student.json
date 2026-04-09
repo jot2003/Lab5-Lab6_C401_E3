@@ -27,9 +27,7 @@
     "maxCreditsPerSemester": 21
   },
   "groupFriends": [
-    { "id": "20210042", "name": "Trần Minh Đức" },
-    { "id": "20210078", "name": "Lê Thị Hương" },
-    { "id": "20210156", "name": "Phạm Hoàng Nam" }
+    { "id": "20210042", "name": "Đức" }
   ],
   "advisorId": "advisor-cs-001",
   "advisorName": "PGS.TS. Nguyễn Thanh Tùng",
@@ -54,9 +52,7 @@
         "maxCreditsPerSemester": 21
       },
       "groupFriends": [
-        { "id": "20210042", "name": "Trần Minh Đức" },
-        { "id": "20210078", "name": "Lê Thị Hương" },
-        { "id": "20210156", "name": "Phạm Hoàng Nam" }
+        { "id": "20210042", "name": "Đức" }
       ],
       "advisorId": "advisor-cs-001",
       "advisorName": "PGS.TS. Nguyễn Thanh Tùng"
@@ -64,7 +60,7 @@
     {
       "id": "20210042",
       "password": "1",
-      "name": "Trần Minh Đức",
+      "name": "Đức",
       "major": "Khoa học Máy tính",
       "program": "CTTT",
       "year": 2,
@@ -79,52 +75,6 @@
         "preferGroupFriends": true,
         "priorityDays": ["Mon","Tue","Wed","Thu","Fri"],
         "maxCreditsPerSemester": 18
-      },
-      "groupFriends": [{ "id": "20210001", "name": "Nguyễn Văn An" }],
-      "advisorId": "advisor-cs-001",
-      "advisorName": "PGS.TS. Nguyễn Thanh Tùng"
-    },
-    {
-      "id": "20210078",
-      "password": "1",
-      "name": "Lê Thị Hương",
-      "major": "Khoa học Máy tính",
-      "program": "CTTT",
-      "year": 2,
-      "gpa": 3.42,
-      "currentSemester": "20252",
-      "completedCourses": ["MI1111","MI1121","PH1110","IT1110","FL1101","SSH1111","PE1011"],
-      "inProgressCourses": [],
-      "targetCourses": ["MI1131","PH1120","IT2110","SSH1121","PE1021"],
-      "preferences": {
-        "avoidMorning": false,
-        "avoidAfternoon": true,
-        "preferGroupFriends": true,
-        "priorityDays": ["Mon","Wed","Fri"],
-        "maxCreditsPerSemester": 20
-      },
-      "groupFriends": [{ "id": "20210001", "name": "Nguyễn Văn An" }],
-      "advisorId": "advisor-cs-001",
-      "advisorName": "PGS.TS. Nguyễn Thanh Tùng"
-    },
-    {
-      "id": "20210156",
-      "password": "1",
-      "name": "Phạm Hoàng Nam",
-      "major": "Khoa học Máy tính",
-      "program": "CTTT",
-      "year": 2,
-      "gpa": 2.98,
-      "currentSemester": "20252",
-      "completedCourses": ["MI1111","MI1121","PH1110","IT1110","FL1101"],
-      "inProgressCourses": [],
-      "targetCourses": ["MI1131","PH1120","IT2110","SSH1121"],
-      "preferences": {
-        "avoidMorning": false,
-        "avoidAfternoon": false,
-        "preferGroupFriends": true,
-        "priorityDays": ["Tue","Thu"],
-        "maxCreditsPerSemester": 17
       },
       "groupFriends": [{ "id": "20210001", "name": "Nguyễn Văn An" }],
       "advisorId": "advisor-cs-001",
