@@ -561,6 +561,10 @@ export const useBKAgent = create<BKAgentState>()(
         }
         set({
           ...initialState,
+          // Keep AI settings across sessions so the profile input
+          // always reflects the currently configured key/provider.
+          aiProvider: s.aiProvider,
+          apiKey: s.apiKey,
           currentSessionId: generateSessionId(),
         });
       },

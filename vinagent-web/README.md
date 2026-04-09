@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BKAgent (HUST) - VinAgent Web
 
-## Getting Started
+Web app ho tro sinh vien HUST lap ke hoach dang ky tin chi voi AI Agent (LangGraph + LangChain), co Plan A/B, do tin cay tung plan, va mo phong dang ky theo nhom.
 
-First, run the development server:
+## Yeu cau moi truong
+
+- Node.js 20.x (khuyen nghi 20 LTS)
+- npm 10+
+- Git
+
+Kiem tra nhanh:
+
+```bash
+node -v
+npm -v
+```
+
+## Cai dat du an
+
+Chay trong thu muc `vinagent-web`:
+
+```bash
+npm install
+```
+
+## Cau hinh bien moi truong
+
+Tao file `.env.local` trong `vinagent-web` (neu chua co):
+
+```bash
+GOOGLE_API_KEY=your_google_key
+OPENAI_API_KEY=your_openai_key
+```
+
+Luu y:
+- Ban co the de trong key trong luc test UI.
+- Trong trang Ho so nguoi dung, co the doi provider va nhap API key truc tiep tren giao dien.
+
+## Chay development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mo trinh duyet tai:
+- [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Neu bi trung cong 3000:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev -- --port 3001
+```
 
-## Learn More
+## Dang nhap demo
 
-To learn more about Next.js, take a look at the following resources:
+- MSSV: `2022600001` / Mat khau: `1`
+- MSSV: `2022600002` / Mat khau: `1`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Lenh kiem tra truoc khi demo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run lint
+npm run test
+npm run build
+```
 
-## Deploy on Vercel
+## Cau truc chinh
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `src/app/api/chat/route.ts`: API stream SSE cho AI agent
+- `src/lib/ai/agent.ts`: LangGraph orchestration
+- `src/lib/ai/tools.ts`: tools va logic lap lich
+- `src/lib/mock/`: mock data (student, courses, schedule, prerequisites, curriculum)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Build production
+
+```bash
+npm run build
+npm start
+```
