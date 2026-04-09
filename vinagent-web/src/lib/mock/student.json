@@ -1,0 +1,32 @@
+{
+  "id": "2A202600205",
+  "name": "Nguyễn Thanh Nam",
+  "major": "Computer Science",
+  "year": 3,
+  "gpa": 3.25,
+  "currentSemester": "20252",
+  "completedCourses": [
+    "IT1110",
+    "IT2000",
+    "IT2030",
+    "IT3010E",
+    "IT3090E"
+  ],
+  "inProgressCourses": [],
+  "targetCourses": ["IT3020E", "IT3100E", "IT3080", "IT3160E"],
+  "preferences": {
+    "avoidMorning": false,
+    "avoidAfternoon": false,
+    "preferGroupFriends": false,
+    "priorityDays": ["Mon", "Tue", "Wed", "Thu"],
+    "maxCreditsPerSemester": 18
+  },
+  "groupFriends": [
+    { "id": "2A202600372", "name": "Hoàng Kim Trí Thành" },
+    { "id": "2A202600019", "name": "Đặng Đinh Tú Anh" },
+    { "id": "2A202600423", "name": "Quách Gia Được" },
+    { "id": "2A202600490", "name": "Phạm Quốc Dũng" }
+  ],
+  "advisorId": "advisor-001",
+  "advisorName": "TS. Nguyễn Văn An"
+}

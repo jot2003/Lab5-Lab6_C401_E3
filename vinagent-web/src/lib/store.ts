@@ -58,18 +58,22 @@ function makeId() {
   return `msg-${++msgCounter}-${Date.now()}`;
 }
 
+// Plan A — Tối ưu (HK 20252): lịch chiều-sáng, chỗ ngồi còn nhiều
+// Nguồn: TKB20252-FULL — slot thực tế từ SIS VinUniversity
 export const PLAN_A_COURSES: CourseSlot[] = [
-  { code: "CECS101", name: "Giải tích 2", day: "Mon", startHour: 9, endHour: 10.5, room: "P.301" },
-  { code: "CECS101", name: "Giải tích 2", day: "Wed", startHour: 9, endHour: 10.5, room: "P.301" },
-  { code: "CECS203", name: "Cấu trúc dữ liệu", day: "Tue", startHour: 13, endHour: 14.5, room: "P.205" },
-  { code: "CECS204", name: "Thực hành OOP", day: "Thu", startHour: 15, endHour: 17, room: "Lab A" },
+  { code: "IT3010E", name: "Cấu trúc dữ liệu và giải thuật", day: "Thu", startHour: 14, endHour: 17.5, room: "D7-201" },   // classId 168276 — 76/90
+  { code: "IT3020E", name: "Toán rời rạc", day: "Tue", startHour: 8.5, endHour: 12, room: "C7-115" },                        // classId 167679 — 72/95
+  { code: "IT3100E", name: "Lập trình hướng đối tượng", day: "Mon", startHour: 9.5, endHour: 12, room: "D9-501" },           // classId 166241 — 134/140 ⚠ gần đầy
+  { code: "IT3080",  name: "Mạng máy tính", day: "Mon", startHour: 12.5, endHour: 15, room: "B1-405" },                      // classId 761897 — 17/40
 ];
 
+// Plan B — Dự phòng (HK 20252): fallback khi Plan A hết chỗ
+// IT3100E chuyển sang slot chiều còn nhiều chỗ; DSA đổi buổi sáng
 export const PLAN_B_COURSES: CourseSlot[] = [
-  { code: "CECS101", name: "Giải tích 2", day: "Mon", startHour: 14, endHour: 15.5, room: "P.302" },
-  { code: "CECS101", name: "Giải tích 2", day: "Wed", startHour: 14, endHour: 15.5, room: "P.302" },
-  { code: "CECS203", name: "Cấu trúc dữ liệu", day: "Tue", startHour: 15, endHour: 16.5, room: "P.206" },
-  { code: "CECS204", name: "Thực hành OOP", day: "Fri", startHour: 9, endHour: 11, room: "Lab B" },
+  { code: "IT3010E", name: "Cấu trúc dữ liệu và giải thuật", day: "Wed", startHour: 7, endHour: 10, room: "C7-115" },        // classId 167940 — 96/100 ⚠ gần đầy
+  { code: "IT3020E", name: "Toán rời rạc", day: "Mon", startHour: 7, endHour: 10, room: "C7-115" },                           // classId 167683 — 80/95
+  { code: "IT3100E", name: "Lập trình hướng đối tượng", day: "Thu", startHour: 15, endHour: 17.5, room: "B1-206" },          // classId 761926 — 14/40 ✓
+  { code: "IT3080",  name: "Mạng máy tính", day: "Tue", startHour: 7, endHour: 9, room: "D9-106" },                           // classId 168467 — 91/120
 ];
 
 export const useVinAgent = create<VinAgentState>((set, get) => ({
