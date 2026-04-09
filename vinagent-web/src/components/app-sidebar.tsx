@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarPlus, BarChart3, Moon, Sun } from "lucide-react";
+import { Home, CalendarPlus, BarChart3, User } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 import {
   Sidebar,
@@ -28,11 +28,11 @@ const NAV_ITEMS = [
 export function AppSidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
