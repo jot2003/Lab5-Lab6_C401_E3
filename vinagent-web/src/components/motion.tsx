@@ -12,9 +12,9 @@ export const FadeIn = ({
   className?: string;
 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 12 }}
+    initial={{ opacity: 0, y: 8 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+    transition={{ duration: 0.25, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     className={className}
   >
     {children}
@@ -31,9 +31,9 @@ export const ScaleIn = ({
   className?: string;
 }) => (
   <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
+    initial={{ opacity: 0, scale: 0.97 }}
     animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.35, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+    transition={{ duration: 0.2, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     className={className}
   >
     {children}
@@ -52,9 +52,9 @@ export const SlideIn = ({
   className?: string;
 }) => (
   <motion.div
-    initial={{ opacity: 0, x: from === "left" ? -20 : 20 }}
+    initial={{ opacity: 0, x: from === "left" ? -12 : 12 }}
     animate={{ opacity: 1, x: 0 }}
-    transition={{ duration: 0.4, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+    transition={{ duration: 0.25, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
     className={className}
   >
     {children}
@@ -71,7 +71,7 @@ export const Stagger = ({
   <motion.div
     initial="hidden"
     animate="visible"
-    variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+    variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
     className={className}
   >
     {children}
@@ -87,8 +87,8 @@ export const StaggerItem = ({
 }) => (
   <motion.div
     variants={{
-      hidden: { opacity: 0, y: 16 },
-      visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+      hidden: { opacity: 0, y: 8 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
     }}
     className={className}
   >

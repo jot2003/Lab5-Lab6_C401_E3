@@ -1,10 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { cn } from "@/lib/cn";
+import { Send } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useVinAgent, type ChatMessage } from "@/lib/store";
 import { TypingText } from "./typing-text";
 import { CitationRef } from "./citation-popover";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const SUGGESTIONS = [
   "Lên lịch HK Xuân 2026, tránh sáng, phải có Giải tích 2",
@@ -33,16 +38,18 @@ function MessageBubble({ message, isLatest }: { message: ChatMessage; isLatest: 
   return (
     <div className={cn("flex gap-2.5", isUser ? "flex-row-reverse" : "flex-row")}>
       {!isUser && (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-[10px] font-bold text-white">
-          VA
-        </div>
+        <Avatar className="size-7 shrink-0">
+          <AvatarFallback className="bg-foreground text-background text-[10px] font-bold">
+            VA
+          </AvatarFallback>
+        </Avatar>
       )}
       <div
         className={cn(
-          "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line",
+          "max-w-[85%] rounded-lg px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line",
           isUser
-            ? "bg-primary text-white rounded-tr-md"
-            : "bg-background border rounded-tl-md",
+            ? "bg-secondary text-foreground rounded-tr-sm"
+            : "border border-border/50 rounded-tl-sm",
         )}
       >
         {!isUser && isLatest ? (
@@ -70,90 +77,99 @@ export function ChatPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {isEmpty && (
-          <div className="flex h-full flex-col items-center justify-center text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-white mb-4">
-              VA
+      <ScrollArea className="flex-1" ref={scrollRef}>
+        <div className="px-4 py-4 space-y-3">
+          {isEmpty && (
+            <div className="flex h-full min-h-[60vh] flex-col items-center justify-center text-center">
+              <Avatar className="size-10 mb-3">
+                <AvatarFallback className="bg-foreground text-background text-sm font-bold">
+                  VA
+                </AvatarFallback>
+              </Avatar>
+              <h3 className="text-sm font-medium leading-normal">Xin chào! Mình là VinAgent</h3>
+              <p className="mt-1 max-w-xs text-xs text-muted-foreground leading-relaxed">
+                Mô tả yêu cầu đăng ký học phần bằng ngôn ngữ tự nhiên, mình sẽ tạo kế hoạch tối ưu cho bạn.
+              </p>
+              <div className="mt-4 flex flex-col gap-1.5 w-full max-w-xs">
+                {SUGGESTIONS.map((s) => (
+                  <Button
+                    key={s}
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto justify-start whitespace-normal text-left text-xs text-muted-foreground px-3 py-2 leading-relaxed"
+                    onClick={() => { setPrompt(s); generate(s); }}
+                  >
+                    {s}
+                  </Button>
+                ))}
+              </div>
             </div>
-            <h3 className="text-base font-semibold">Xin chào! Mình là VinAgent</h3>
-            <p className="mt-1 max-w-xs text-sm text-muted">
-              Mô tả yêu cầu đăng ký học phần bằng ngôn ngữ tự nhiên, mình sẽ tạo kế hoạch tối ưu cho bạn.
-            </p>
-            <div className="mt-6 flex flex-col gap-2 w-full max-w-xs">
-              {SUGGESTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => { setPrompt(s); generate(s); }}
-                  className="rounded-xl border bg-white px-4 py-2.5 text-left text-xs text-muted transition-all hover:border-primary/40 hover:text-primary"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+          )}
 
-        {messages.map((msg, idx) => (
-          <MessageBubble key={msg.id} message={msg} isLatest={idx === messages.length - 1 && msg.role === "assistant"} />
-        ))}
+          {messages.map((msg, idx) => (
+            <MessageBubble key={msg.id} message={msg} isLatest={idx === messages.length - 1 && msg.role === "assistant"} />
+          ))}
 
-        {isTyping && (
-          <div className="flex gap-2.5">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary text-[10px] font-bold text-white">
-              VA
+          {isTyping && (
+            <div className="flex gap-2.5">
+              <Avatar className="size-7 shrink-0">
+                <AvatarFallback className="bg-foreground text-background text-[10px] font-bold">
+                  VA
+                </AvatarFallback>
+              </Avatar>
+              <div className="rounded-lg rounded-tl-sm border border-border/50 px-3 py-2.5">
+                <span className="flex gap-1">
+                  <span className="size-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="size-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="size-1.5 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
+                </span>
+              </div>
             </div>
-            <div className="rounded-2xl rounded-tl-md border bg-background px-4 py-3">
-              <span className="flex gap-1">
-                <span className="h-2 w-2 rounded-full bg-muted animate-bounce" style={{ animationDelay: "0ms" }} />
-                <span className="h-2 w-2 rounded-full bg-muted animate-bounce" style={{ animationDelay: "150ms" }} />
-                <span className="h-2 w-2 rounded-full bg-muted animate-bounce" style={{ animationDelay: "300ms" }} />
-              </span>
-            </div>
-          </div>
-        )}
+          )}
 
-        {(flow === "lowConfidence" || flow === "idle") && messages.length > 0 && !isTyping && (
-          <div className="flex gap-2 pl-9">
-            <button
-              type="button"
-              onClick={() => clarify("avoidMorning")}
-              className="rounded-xl border bg-white px-3 py-2 text-xs font-medium transition-all hover:border-primary/40 hover:text-primary"
-            >
-              Tránh lịch sáng
-            </button>
-            <button
-              type="button"
-              onClick={() => clarify("keepGroup")}
-              className="rounded-xl border bg-white px-3 py-2 text-xs font-medium transition-all hover:border-primary/40 hover:text-primary"
-            >
-              Giữ lớp cùng nhóm
-            </button>
-          </div>
-        )}
-      </div>
+          {(flow === "lowConfidence" || flow === "idle") && messages.length > 0 && !isTyping && (
+            <div className="flex gap-1.5 pl-9">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground"
+                onClick={() => clarify("avoidMorning")}
+              >
+                Tránh lịch sáng
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground"
+                onClick={() => clarify("keepGroup")}
+              >
+                Giữ lớp cùng nhóm
+              </Button>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
 
       <form
-        className="border-t bg-white px-4 py-3"
+        className="border-t border-border/50 px-4 py-3"
         onSubmit={(e) => { e.preventDefault(); if (prompt.trim()) generate(prompt.trim()); }}
       >
         <div className="flex gap-2">
-          <input
+          <Input
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Nhập yêu cầu đăng ký học phần..."
             disabled={isTyping}
-            className="flex-1 rounded-xl border bg-background px-4 py-2.5 text-sm transition-all placeholder:text-muted focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:opacity-50"
+            className="flex-1 bg-transparent"
           />
-          <button
+          <Button
             type="submit"
+            size="default"
             disabled={!prompt.trim() || isTyping}
-            className="btn-primary rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50 disabled:transform-none"
           >
-            Gửi
-          </button>
+            <Send className="size-4" />
+          </Button>
         </div>
       </form>
     </div>

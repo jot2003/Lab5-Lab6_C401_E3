@@ -33,7 +33,7 @@ export function TypingText({
   return (
     <span>
       {displayed}
-      {!done && <span className="inline-block w-0.5 h-4 bg-primary animate-pulse ml-0.5 align-text-bottom" />}
+      {!done && <span className="inline-block w-0.5 h-4 bg-foreground animate-pulse ml-0.5 align-text-bottom" />}
     </span>
   );
 }

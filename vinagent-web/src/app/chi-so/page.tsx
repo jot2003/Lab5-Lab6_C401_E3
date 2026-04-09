@@ -1,7 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import { FadeIn, Stagger, StaggerItem } from "@/components/motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type MetricItem = {
   label: string;
@@ -19,35 +21,50 @@ const METRICS: MetricItem[] = [
   { label: "Tín hiệu do dự thu thập", value: "127", target: "> 500/kỳ", status: "danger" },
 ];
 
-const statusColors = {
-  good: "border-success/30 bg-success/5 text-success",
-  warning: "border-warning/30 bg-warning/5 text-warning",
-  danger: "border-accent/30 bg-accent/5 text-accent",
+const statusClasses = {
+  good: "border-success/30 text-success",
+  warning: "border-warning/30 text-warning",
+  danger: "border-danger/30 text-danger",
 };
 
 const statusLabels = { good: "Đạt", warning: "Theo dõi", danger: "Cờ đỏ" };
 
 export default function MetricsPage() {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8">
+    <div className="w-full max-w-4xl mx-auto px-4 py-6">
       <FadeIn>
-        <header className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight">Bảng chỉ số vận hành</h1>
-          <p className="mt-1 text-sm text-muted">Theo dõi sức khỏe hệ thống theo ngưỡng triển khai.</p>
+        <header className="mb-6">
+          <h1 className="text-lg font-medium tracking-tight leading-tight">
+            Bảng chỉ số vận hành
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+            Theo dõi sức khỏe hệ thống theo ngưỡng triển khai.
+          </p>
         </header>
       </FadeIn>
 
-      <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Stagger className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {METRICS.map((m) => (
           <StaggerItem key={m.label}>
-            <article className="rounded-xl border bg-white p-5 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <p className="text-xs font-medium text-muted">{m.label}</p>
-              <p className="mt-2 text-2xl font-bold tracking-tight">{m.value}</p>
-              <p className="mt-1 text-[11px] text-muted">Mục tiêu: {m.target}</p>
-              <span className={cn("mt-3 inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold", statusColors[m.status])}>
-                {statusLabels[m.status]}
-              </span>
-            </article>
+            <Card className="border-border/50 bg-card hover:border-border transition-colors">
+              <CardContent className="p-4">
+                <p className="text-xs font-medium text-muted-foreground leading-normal">
+                  {m.label}
+                </p>
+                <p className="mt-2 font-mono text-2xl font-semibold tracking-tight">
+                  {m.value}
+                </p>
+                <p className="mt-1 text-[11px] text-muted-foreground leading-normal">
+                  Mục tiêu: {m.target}
+                </p>
+                <Badge
+                  variant="outline"
+                  className={cn("mt-3 text-[10px] leading-normal", statusClasses[m.status])}
+                >
+                  {statusLabels[m.status]}
+                </Badge>
+              </CardContent>
+            </Card>
           </StaggerItem>
         ))}
       </Stagger>

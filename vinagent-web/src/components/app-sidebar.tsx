@@ -1,0 +1,66 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Home, CalendarPlus, BarChart3 } from "lucide-react";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+
+const NAV_ITEMS = [
+  { href: "/", label: "Trang chủ", icon: Home },
+  { href: "/tao-ke-hoach", label: "Tạo kế hoạch", icon: CalendarPlus },
+  { href: "/chi-so", label: "Bảng chỉ số", icon: BarChart3 },
+];
+
+export function AppSidebar() {
+  const pathname = usePathname();
+
+  return (
+    <Sidebar collapsible="icon" variant="sidebar">
+      <SidebarHeader className="p-3">
+        <Link href="/" className="flex items-center gap-2 px-1">
+          <div className="flex size-7 items-center justify-center rounded-md bg-foreground text-background text-xs font-bold">
+            VA
+          </div>
+          <span className="text-sm font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
+            VinAgent
+          </span>
+        </Link>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {NAV_ITEMS.map((item) => {
+                const active =
+                  pathname === item.href ||
+                  (item.href !== "/" && pathname.startsWith(item.href));
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={active}
+                      tooltip={item.label}
+                      render={<Link href={item.href} />}
+                    >
+                      <item.icon className="size-4" />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
+  );
+}

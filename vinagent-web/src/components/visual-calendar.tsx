@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/cn";
+import { cn } from "@/lib/utils";
 import type { CourseSlot } from "@/lib/store";
+import { Card } from "@/components/ui/card";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"] as const;
 const DAY_LABELS: Record<string, string> = {
@@ -40,11 +41,11 @@ export function VisualCalendar({
         <div
           key={`${plan}-${slot.code}-${slot.day}-${idx}`}
           className={cn(
-            "absolute rounded-lg border px-2 py-1.5 text-[10px] font-medium leading-tight transition-opacity",
+            "absolute rounded-md border px-1.5 py-1 text-[10px] font-medium leading-tight transition-opacity",
             plan === "A"
-              ? "bg-primary/15 border-primary/30 text-primary"
-              : "bg-accent/15 border-accent/30 text-accent",
-            !isActive && "opacity-30",
+              ? "bg-foreground/10 border-foreground/20 text-foreground"
+              : "bg-muted-foreground/10 border-muted-foreground/20 text-muted-foreground",
+            !isActive && "opacity-25",
           )}
           style={{
             ...style,
@@ -55,21 +56,21 @@ export function VisualCalendar({
           }}
           title={`${slot.code} ${slot.name}\n${slot.day} ${slot.startHour}:00–${slot.endHour}:00\n${slot.room ?? ""}`}
         >
-          <span className="font-bold">{slot.code}</span>
+          <span className="font-semibold">{slot.code}</span>
           <br />
-          <span className="opacity-80">{slot.name}</span>
-          {slot.room && <><br /><span className="opacity-60">{slot.room}</span></>}
+          <span className="opacity-70">{slot.name}</span>
+          {slot.room && <><br /><span className="opacity-50">{slot.room}</span></>}
         </div>
       );
     });
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white">
-      <div className="grid grid-cols-[48px_repeat(5,1fr)] border-b bg-background/60">
+    <Card className="border-border/50 bg-card overflow-hidden">
+      <div className="grid grid-cols-[48px_repeat(5,1fr)] border-b border-border/50">
         <div className="p-2" />
         {DAYS.map((d) => (
-          <div key={d} className="border-l p-2 text-center text-[11px] font-semibold text-muted">
+          <div key={d} className="border-l border-border/30 p-2 text-center text-[11px] font-medium text-muted-foreground leading-normal">
             {DAY_LABELS[d]}
           </div>
         ))}
@@ -79,7 +80,7 @@ export function VisualCalendar({
           {hours.map((h) => (
             <div
               key={h}
-              className="absolute right-2 text-[10px] text-muted"
+              className="absolute right-2 font-mono text-[10px] text-muted-foreground"
               style={{ top: `${((h - START_HOUR) / (END_HOUR - START_HOUR)) * 100}%`, transform: "translateY(-50%)" }}
             >
               {h}:00
@@ -90,7 +91,7 @@ export function VisualCalendar({
           {hours.map((h) => (
             <div
               key={h}
-              className="absolute inset-x-0 border-t border-dashed border-border/50"
+              className="absolute inset-x-0 border-t border-dashed border-border/30"
               style={{ top: `${((h - START_HOUR) / (END_HOUR - START_HOUR)) * 100}%` }}
             />
           ))}
@@ -98,18 +99,18 @@ export function VisualCalendar({
           {showPlanB && renderSlots(planB, "B")}
         </div>
       </div>
-      <div className="flex items-center gap-4 border-t px-3 py-2 text-[10px]">
+      <div className="flex items-center gap-4 border-t border-border/50 px-3 py-2 text-[10px]">
         <div className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded bg-primary/40" />
-          <span className="text-muted">Plan A — Tối ưu</span>
+          <span className="size-2.5 rounded-sm bg-foreground/30" />
+          <span className="text-muted-foreground">Plan A — Tối ưu</span>
         </div>
         {showPlanB && (
           <div className="flex items-center gap-1.5">
-            <span className="h-2.5 w-2.5 rounded bg-accent/40" />
-            <span className="text-muted">Plan B — Dự phòng</span>
+            <span className="size-2.5 rounded-sm bg-muted-foreground/30" />
+            <span className="text-muted-foreground">Plan B — Dự phòng</span>
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
