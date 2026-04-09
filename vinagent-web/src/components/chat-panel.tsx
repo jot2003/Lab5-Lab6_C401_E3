@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVinAgent, type ChatMessage } from "@/lib/store";
@@ -20,6 +20,18 @@ const SUGGESTIONS = [
 function MessageBubble({ message, isLatest }: { message: ChatMessage; isLatest: boolean }) {
   const { citations } = useVinAgent();
   const isUser = message.role === "user";
+  const [typingDone, setTypingDone] = useState(false);
+
+  function highlightImportant(text: string) {
+    const redTerms = /(\bPlan B\b|rủi ro|thất bại|cảnh báo|Rủi ro|Thất bại|Cảnh báo)/g;
+    const blueTerms = /(\bPlan A\b|thành công|Thành công|Độ tin cậy|độ tin cậy|đã tạo|Đã tạo|Đã xác nhận|đã xác nhận)/g;
+
+    return text.split(/(\bPlan [AB]\b|rủi ro|thất bại|cảnh báo|Rủi ro|Thất bại|Cảnh báo|thành công|Thành công|Độ tin cậy|độ tin cậy|đã tạo|Đã tạo|Đã xác nhận|đã xác nhận)/g).map((part, i) => {
+      if (redTerms.test(part)) return <span key={i} className="font-semibold text-[#C72127]">{part}</span>;
+      if (blueTerms.test(part)) return <span key={i} className="font-semibold text-[#134D8B]">{part}</span>;
+      return <span key={i}>{part}</span>;
+    });
+  }
 
   function renderTextWithCitations(text: string) {
     const parts = text.split(/\[(\d+(?:,\d+)*)\]/g);
@@ -31,7 +43,7 @@ function MessageBubble({ message, isLatest }: { message: ChatMessage; isLatest: 
           return <CitationRef key={`${message.id}-cit-${id}`} id={id} citation={cit} />;
         });
       }
-      return <span key={`${message.id}-text-${i}`}>{part}</span>;
+      return <span key={`${message.id}-text-${i}`}>{highlightImportant(part)}</span>;
     });
   }
 
@@ -48,12 +60,12 @@ function MessageBubble({ message, isLatest }: { message: ChatMessage; isLatest: 
         className={cn(
           "max-w-[85%] rounded-lg px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line",
           isUser
-            ? "bg-secondary text-foreground rounded-tr-sm"
+            ? "bg-[#134D8B] dark:bg-zinc-800 text-white border-0 rounded-tr-sm"
             : "border border-border/50 rounded-tl-sm",
         )}
       >
-        {!isUser && isLatest ? (
-          <TypingText text={message.text} speed={12} />
+        {!isUser && isLatest && !typingDone ? (
+          <TypingText text={message.text} speed={12} onComplete={() => setTypingDone(true)} />
         ) : (
           renderTextWithCitations(message.text)
         )}

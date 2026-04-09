@@ -33,6 +33,10 @@ export function VisualCalendar({
 
   function renderSlots(slots: CourseSlot[], plan: "A" | "B") {
     const isActive = selectedPlan === plan || selectedPlan === null;
+    // When both plans shown, split each column: A on left half, B on right half
+    const colWidth = showPlanB ? 100 / 5 / 2 : 100 / 5;
+    const colOffset = plan === "B" && showPlanB ? colWidth : 0;
+
     return slots.map((slot, idx) => {
       const dayIdx = DAYS.indexOf(slot.day);
       if (dayIdx < 0) return null;
@@ -41,24 +45,24 @@ export function VisualCalendar({
         <div
           key={`${plan}-${slot.code}-${slot.day}-${idx}`}
           className={cn(
-            "absolute rounded-md border px-1.5 py-1 text-[10px] font-medium leading-tight transition-opacity",
+            "absolute rounded-md border px-1 py-1 text-[10px] font-medium leading-tight transition-opacity overflow-hidden",
             plan === "A"
-              ? "bg-foreground/10 border-foreground/20 text-foreground"
-              : "bg-muted-foreground/10 border-muted-foreground/20 text-muted-foreground",
+              ? "bg-[#134D8B]/10 border-[#134D8B]/30 text-foreground"
+              : "bg-[#C72127]/10 border-[#C72127]/30 text-foreground",
             !isActive && "opacity-25",
           )}
           style={{
             ...style,
-            left: `${(dayIdx / 5) * 100}%`,
-            width: `${100 / 5}%`,
-            paddingLeft: "6px",
-            paddingRight: "6px",
+            left: `${(dayIdx / 5) * 100 + colOffset}%`,
+            width: `${colWidth}%`,
+            paddingLeft: "4px",
+            paddingRight: "4px",
           }}
           title={`${slot.code} ${slot.name}\n${slot.day} ${slot.startHour}:00–${slot.endHour}:00\n${slot.room ?? ""}`}
         >
           <span className="font-semibold">{slot.code}</span>
           <br />
-          <span className="opacity-70">{slot.name}</span>
+          <span className="opacity-70 truncate block">{slot.name}</span>
           {slot.room && <><br /><span className="opacity-50">{slot.room}</span></>}
         </div>
       );
@@ -101,12 +105,12 @@ export function VisualCalendar({
       </div>
       <div className="flex items-center gap-4 border-t border-border/50 px-3 py-2 text-[10px]">
         <div className="flex items-center gap-1.5">
-          <span className="size-2.5 rounded-sm bg-foreground/30" />
+          <span className="size-2.5 rounded-sm bg-[#134D8B]/40" />
           <span className="text-muted-foreground">Plan A — Tối ưu</span>
         </div>
         {showPlanB && (
           <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-sm bg-muted-foreground/30" />
+            <span className="size-2.5 rounded-sm bg-[#C72127]/40" />
             <span className="text-muted-foreground">Plan B — Dự phòng</span>
           </div>
         )}
