@@ -29,7 +29,7 @@ export default function UserProfilePage() {
 
   if (!student) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+      <div className="flex h-full overflow-y-auto items-center justify-center bg-background px-6">
         <div className="w-full max-w-sm text-center">
           <div className="mb-6 flex justify-center">
             <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -60,7 +60,7 @@ export default function UserProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-full overflow-y-auto bg-background">
       {/* Header */}
       <div className="bg-primary px-6 pt-12 pb-20">
         <div className="max-w-lg mx-auto flex items-center justify-between">

@@ -265,6 +265,7 @@ export const generateScheduleTool = tool(
         endHour: s.endHour,
         room: s.room,
         seats: `${s.enrolled}/${s.capacity}`,
+        slotsRemaining: s.capacity - s.enrolled,
         seatRisk: s.seatRisk,
         classId: s.classId,
       })) ?? null;
