@@ -8,8 +8,10 @@ const SESSION_KEY = "vinagent.currentUser";
 
 type StoredAccount = {
   studentId: string;
-  studentName: string;
+  studentName?: string;
   createdAt: string;
+  // Backward compatibility for old account records.
+  password?: string;
 };
 
 export type AuthResult = {
@@ -32,7 +34,7 @@ function readAccounts(): StoredAccount[] {
     return parsed.filter(
       (item): item is StoredAccount =>
         typeof item?.studentId === "string" &&
-        typeof item?.studentName === "string" &&
+        (typeof item?.studentName === "string" || typeof item?.password === "string") &&
         typeof item?.createdAt === "string",
     );
   } catch {
@@ -50,7 +52,12 @@ export function getStudentById(studentId: string): StudentProfile | null {
 }
 
 function normalizeName(name: string): string {
-  return name.trim().replace(/\s+/g, " ").toLowerCase();
+  return name
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 }
 
 export function registerAccount(studentId: string, studentName: string): AuthResult {
@@ -99,7 +106,8 @@ export function loginAccount(studentId: string, studentName: string): AuthResult
   }
 
   const accounts = readAccounts();
-  const account = accounts.find((acc) => acc.studentId === normalizedId);
+  const accountIndex = accounts.findIndex((acc) => acc.studentId === normalizedId);
+  const account = accountIndex >= 0 ? accounts[accountIndex] : undefined;
   if (!account) {
     return { ok: false, message: "Chưa có tài khoản. Vui lòng đăng ký trước." };
   }
@@ -108,8 +116,20 @@ export function loginAccount(studentId: string, studentName: string): AuthResult
     return { ok: false, message: "Họ tên không khớp với mã sinh viên." };
   }
 
-  if (normalizeName(account.studentName) !== normalizedName) {
+  const accountName = normalizeName(account.studentName || student.name);
+  if (accountName !== normalizedName) {
     return { ok: false, message: "Thông tin đăng nhập không khớp tài khoản đã đăng ký." };
+  }
+
+  // Auto-migrate old account records that did not store studentName.
+  if (!account.studentName) {
+    const nextAccounts = [...accounts];
+    nextAccounts[accountIndex] = {
+      ...account,
+      studentName: student.name,
+      password: undefined,
+    };
+    writeAccounts(nextAccounts);
   }
 
   if (isBrowser()) {

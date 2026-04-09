@@ -49,6 +49,30 @@ describe("auth login/register flows", () => {
     expect(result.message).toMatch(/Họ tên không khớp/i);
   });
 
+  it("allows register/login with non-accented name input", () => {
+    const registerResult = registerAccount("20210001", "Nguyen Van An");
+    expect(registerResult.ok).toBe(true);
+
+    const loginResult = loginAccount("20210001", "Nguyen Van An");
+    expect(loginResult.ok).toBe(true);
+  });
+
+  it("supports legacy account records created with password format", () => {
+    window.localStorage.setItem(
+      "vinagent.accounts",
+      JSON.stringify([
+        {
+          studentId: "20210001",
+          password: "old-secret",
+          createdAt: new Date().toISOString(),
+        },
+      ]),
+    );
+
+    const loginResult = loginAccount("20210001", "Nguyễn Văn An");
+    expect(loginResult.ok).toBe(true);
+  });
+
   it("verifies current logged-in student against source data", () => {
     registerAccount("20210001", "Nguyễn Văn An");
     loginAccount("20210001", "Nguyễn Văn An");
