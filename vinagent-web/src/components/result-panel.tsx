@@ -72,7 +72,12 @@ function ConfidenceBar({
       <div className="flex items-center justify-between px-4 py-3">
         <div>
           <span className="text-sm font-bold text-white">Độ tin cậy từng plan</span>
-          <p className="text-xs text-white/70 mt-0.5">Tính theo slot còn trống + seat risk</p>
+          <p className="text-xs text-white/80 mt-0.5">
+            60%: lớp còn nhiều chỗ • 25%: lịch trong tuần đỡ dồn • 15%: môn được chia đều giữa các ngày.
+          </p>
+          <p className="text-[11px] text-white/70 mt-0.5">
+            Điểm được giữ trong khoảng 35-99, điểm càng cao thì plan càng ổn.
+          </p>
         </div>
         <div className="text-right">
           <p className="font-mono text-base font-bold text-white">

@@ -311,10 +311,16 @@ export const useBKAgent = create<BKAgentState>()(
                   const allCitIds = (data.citations ?? []).map(
                     (c: Citation) => c.id
                   );
+                  const hasBothPlans = (data.planA?.length ?? 0) > 0 && (data.planB?.length ?? 0) > 0;
+                  const planPickHint =
+                    "Hãy bấm chọn plan ở góc phải trên của màn hình trước khi đăng ký.";
+                  const assistantText = hasBothPlans && !(data.text ?? "").includes(planPickHint)
+                    ? `${(data.text ?? "").trim()}\n\n${planPickHint}`
+                    : (data.text ?? "");
                   const assistantMsg: ChatMessage = {
                     id: makeId(),
                     role: "assistant",
-                    text: data.text ?? "",
+                    text: assistantText,
                     citationIds: allCitIds,
                     timestamp: new Date(),
                   };
@@ -354,11 +360,8 @@ export const useBKAgent = create<BKAgentState>()(
                       isTyping: false,
                       streamingSteps: s.streamingSteps,
                       flow: data.flow,
-                      selectedPlan:
-                        s.selectedPlan ??
-                        (needsPlanB
-                          ? (updatedPlanB.length > 0 ? "B" : updatedPlanA.length > 0 ? "A" : null)
-                          : (updatedPlanA.length > 0 ? "A" : updatedPlanB.length > 0 ? "B" : null)),
+                      // Always require explicit user choice after generation.
+                      selectedPlan: null,
                       confidenceScore: data.confidenceScore,
                       redFlags: flags,
                       reasons: (data.citations ?? []).map((c: Citation) => ({
