@@ -8,7 +8,7 @@ const SESSION_KEY = "vinagent.currentUser";
 
 type StoredAccount = {
   studentId: string;
-  password: string;
+  studentName: string;
   createdAt: string;
 };
 
@@ -32,7 +32,7 @@ function readAccounts(): StoredAccount[] {
     return parsed.filter(
       (item): item is StoredAccount =>
         typeof item?.studentId === "string" &&
-        typeof item?.password === "string" &&
+        typeof item?.studentName === "string" &&
         typeof item?.createdAt === "string",
     );
   } catch {
@@ -49,20 +49,25 @@ export function getStudentById(studentId: string): StudentProfile | null {
   return getStudentByIdFromData(studentId);
 }
 
-export function registerAccount(studentId: string, password: string): AuthResult {
+function normalizeName(name: string): string {
+  return name.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+export function registerAccount(studentId: string, studentName: string): AuthResult {
   const normalizedId = studentId.trim();
+  const normalizedName = normalizeName(studentName);
 
-  if (!normalizedId || !password) {
-    return { ok: false, message: "Vui lòng nhập đầy đủ mã sinh viên và mật khẩu." };
-  }
-
-  if (password.length < 6) {
-    return { ok: false, message: "Mật khẩu phải có ít nhất 6 ký tự." };
+  if (!normalizedId || !normalizedName) {
+    return { ok: false, message: "Vui lòng nhập đầy đủ mã sinh viên và họ tên." };
   }
 
   const student = getStudentById(normalizedId);
   if (!student) {
     return { ok: false, message: "Không tìm thấy người dùng trong student.json." };
+  }
+
+  if (normalizeName(student.name) !== normalizedName) {
+    return { ok: false, message: "Họ tên không khớp với dữ liệu student.json." };
   }
 
   const accounts = readAccounts();
@@ -73,17 +78,19 @@ export function registerAccount(studentId: string, password: string): AuthResult
 
   const nextAccounts = [
     ...accounts,
-    { studentId: normalizedId, password, createdAt: new Date().toISOString() },
+    { studentId: normalizedId, studentName: student.name, createdAt: new Date().toISOString() },
   ];
   writeAccounts(nextAccounts);
 
   return { ok: true, message: "Đăng ký thành công. Bạn có thể đăng nhập ngay." };
 }
 
-export function loginAccount(studentId: string, password: string): AuthResult {
+export function loginAccount(studentId: string, studentName: string): AuthResult {
   const normalizedId = studentId.trim();
-  if (!normalizedId || !password) {
-    return { ok: false, message: "Vui lòng nhập đầy đủ mã sinh viên và mật khẩu." };
+  const normalizedName = normalizeName(studentName);
+
+  if (!normalizedId || !normalizedName) {
+    return { ok: false, message: "Vui lòng nhập đầy đủ mã sinh viên và họ tên." };
   }
 
   const student = getStudentById(normalizedId);
@@ -97,8 +104,12 @@ export function loginAccount(studentId: string, password: string): AuthResult {
     return { ok: false, message: "Chưa có tài khoản. Vui lòng đăng ký trước." };
   }
 
-  if (account.password !== password) {
-    return { ok: false, message: "Mật khẩu không chính xác." };
+  if (normalizeName(student.name) !== normalizedName) {
+    return { ok: false, message: "Họ tên không khớp với mã sinh viên." };
+  }
+
+  if (normalizeName(account.studentName) !== normalizedName) {
+    return { ok: false, message: "Thông tin đăng nhập không khớp tài khoản đã đăng ký." };
   }
 
   if (isBrowser()) {

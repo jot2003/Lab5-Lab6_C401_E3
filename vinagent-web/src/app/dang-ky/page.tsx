@@ -13,8 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function RegisterPage() {
   const router = useRouter();
   const [studentId, setStudentId] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [studentName, setStudentName] = useState("");
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
 
   const student = useMemo(() => getStudentById(studentId.trim()), [studentId]);
@@ -22,12 +21,7 @@ export default function RegisterPage() {
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (password !== confirmPassword) {
-      setStatus({ ok: false, message: "Mật khẩu xác nhận không khớp." });
-      return;
-    }
-
-    const result = registerAccount(studentId, password);
+    const result = registerAccount(studentId, studentName);
     setStatus(result);
 
     if (result.ok) {
@@ -44,7 +38,7 @@ export default function RegisterPage() {
             Đăng ký tài khoản
           </CardTitle>
           <CardDescription>
-            Tạo tài khoản bằng mã sinh viên. Hệ thống sẽ kiểm tra thông tin trong student.json.
+            Tạo tài khoản bằng mã sinh viên và họ tên. Hệ thống sẽ kiểm tra thông tin trong student.json.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,24 +54,12 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="password" className="text-xs text-muted-foreground">Mật khẩu</label>
+              <label htmlFor="student-name" className="text-xs text-muted-foreground">Họ tên</label>
               <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Tối thiểu 6 ký tự"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="confirm-password" className="text-xs text-muted-foreground">Xác nhận mật khẩu</label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Nhập lại mật khẩu"
+                id="student-name"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                placeholder="VD: Nguyễn Văn An"
               />
             </div>
 

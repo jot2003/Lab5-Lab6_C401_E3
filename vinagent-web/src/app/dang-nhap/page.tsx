@@ -13,12 +13,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default function LoginPage() {
   const router = useRouter();
   const [studentId, setStudentId] = useState("");
-  const [password, setPassword] = useState("");
+  const [studentName, setStudentName] = useState("");
   const [status, setStatus] = useState<{ ok: boolean; message: string } | null>(null);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const result = loginAccount(studentId, password);
+    const result = loginAccount(studentId, studentName);
     setStatus(result);
     if (result.ok) {
       setTimeout(() => router.push("/nguoi-dung"), 500);
@@ -34,7 +34,7 @@ export default function LoginPage() {
             Đăng nhập
           </CardTitle>
           <CardDescription>
-            Đăng nhập để truy cập và kiểm tra thông tin người dùng trong student.json.
+            Đăng nhập bằng mã sinh viên và họ tên để truy cập thông tin người dùng.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -50,13 +50,12 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="password-login" className="text-xs text-muted-foreground">Mật khẩu</label>
+              <label htmlFor="student-name-login" className="text-xs text-muted-foreground">Họ tên</label>
               <Input
-                id="password-login"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Nhập mật khẩu"
+                id="student-name-login"
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                placeholder="VD: Nguyễn Văn An"
               />
             </div>
 
